@@ -42,6 +42,6 @@ class Shortlist(db.Model):
             "student_id": self.student_id,
             "position_id": self.position_id,
             "staff_id": self.staff_id,
-            "status": self.status
+            "status": self.status.value
         }
       
