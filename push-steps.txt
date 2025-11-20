@@ -1,0 +1,6 @@
+Step 1:
+Fetch origin to update local main
+
+Step 2:
+Go back to local branch and do an update from main
+
