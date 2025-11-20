@@ -10,8 +10,8 @@ class Position(db.Model):
     __tablename__ = 'position'
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(255), nullable=False)
-    number_of_positions = db.Column(db.Integer, default=1)
-    status = db.Column(Enum(PositionStatus, native_enum=False), nullable=False, default=PositionStatus.open)
+    number_of_positions = db.Column(db.Integer, default=1) #position closes after this number is filled
+    status = db.Column(Enum(PositionStatus, native_enum=False), nullable=False, default=PositionStatus.open) #implement state design pattern 
     employer_id = db.Column(db.Integer, db.ForeignKey('employer.id'), nullable=False)
     employer = db.relationship("Employer", back_populates="positions")
 
@@ -21,7 +21,17 @@ class Position(db.Model):
         self.status = "open"
         self.number_of_positions = number
         
-
+    def toJSON(self):
+        return {
+            "id": self.id,
+            "title": self.title,
+            "number_of_positions": self.number_of_positions,
+            "status": self.status.value,
+            "employer_id": self.employer_id
+        }
+    
+    #move these to controllers
+    
     def update_status(self, status):
         self.status = status
         db.session.commit()
@@ -39,12 +49,3 @@ class Position(db.Model):
 
     def list_positions(self):
         return db.session.query(Position).all()
-
-    def toJSON(self):
-        return {
-            "id": self.id,
-            "title": self.title,
-            "number_of_positions": self.number_of_positions,
-            "status": self.status.value,
-            "employer_id": self.employer_id
-        }

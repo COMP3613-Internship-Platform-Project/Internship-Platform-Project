@@ -15,7 +15,7 @@ def open_position(user_id, title, number_of_positions=1):
         db.session.rollback()
         return None
 
-
+#probably don't need this one
 def get_positions_by_employer(user_id):
     employer = Employer.query.filter_by(user_id=user_id).first()
     return db.session.query(Position).filter_by(employer_id=employer.id).all()
@@ -32,3 +32,5 @@ def get_positions_by_employer_json(user_id):
     if positions:
         return [position.toJSON() for position in positions]
     return []
+
+

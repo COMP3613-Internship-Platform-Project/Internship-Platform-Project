@@ -2,6 +2,7 @@ from sqlalchemy import false
 from App.models import Shortlist, Position, Staff, Student
 from App.database import db
 
+#add checking for state of position 
 def add_student_to_shortlist(student_id, position_id, staff_id):
     teacher = db.session.query(Staff).filter_by(user_id=staff_id).first()
     student = db.session.query(Student).filter_by(user_id=student_id).first()
@@ -21,6 +22,7 @@ def add_student_to_shortlist(student_id, position_id, staff_id):
     
     return False
 
+#add checking for state of position 
 def decide_shortlist(student_id, position_id, decision):
     student = db.session.query(Student).filter_by(user_id=student_id).first()
     shortlist = db.session.query(Shortlist).filter_by(student_id=student.id, position_id=position_id, status ="pending").first()

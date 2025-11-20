@@ -3,12 +3,14 @@ from App.models.user import User
 from sqlalchemy import Enum
 import enum  
 
-class DecisionStatus(enum.Enum):
+#Convert this class to the Application Class and create a new Shortlist class
+
+class DecisionStatus(enum.Enum): 
     accepted = "accepted"
     rejected = "rejected"
     pending = "pending"
 
-class Shortlist(db.Model):
+class Shortlist(db.Model): 
     __tablename__ = 'shortlist'
     id = db.Column(db.Integer, primary_key=True)
     student_id = db.Column(db.Integer, db.ForeignKey('student.id'), nullable=False)
@@ -27,6 +29,17 @@ class Shortlist(db.Model):
         self.staff_id = staff_id
         self.title = title
         
+    def toJSON(self):
+        return{
+            "id": self.id,
+            "title": self.title,
+            "student_id": self.student_id,
+            "position_id": self.position_id,
+            "staff_id": self.staff_id,
+            "status": self.status.value
+        }
+      
+     #move these to controllers if any are being kept 
     def update_status(self, status):
         self.status = PositionStatus(status)
         db.session.commit()
@@ -38,13 +51,3 @@ class Shortlist(db.Model):
     def position_shortlist(self, position_id):
         return db.session.query(Shortlist).filter_by(position_id=position_id).all()
         
-    def toJSON(self):
-        return{
-            "id": self.id,
-            "title": self.title,
-            "student_id": self.student_id,
-            "position_id": self.position_id,
-            "staff_id": self.staff_id,
-            "status": self.status.value
-        }
-      

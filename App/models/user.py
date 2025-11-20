@@ -8,6 +8,7 @@ class User(db.Model):
     password = db.Column(db.String(256), nullable=False)
     role = db.Column(db.String(50), nullable=False)
 
+    #Won't be necessary after establishing inheritance
     student = db.relationship('Student', backref='user', uselist=False)
     employer = db.relationship('Employer', backref='user', uselist=False)
     staff = db.relationship('Staff', backref='user', uselist=False)
