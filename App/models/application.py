@@ -3,13 +3,6 @@ from App.models.user import User
 from sqlalchemy import Enum
 import enum  
 
-#Convert this class to the Application Class and create a new Shortlist class
-
-from App.database import db
-from App.models.user import User
-from sqlalchemy import Enum
-import enum  
-
 #Converted this class to the Application Class
 
 class Application(db.Model):
