@@ -1,6 +1,5 @@
 from App.database import db
 from App.models.user import User
-from App.models.shortlist import Shortlist
 
 class Staff(User):
     __tablename__ = 'staff'
@@ -12,8 +11,8 @@ class Staff(User):
         'polymorphic_identity': 'staff',
     }
 
-    def __init__(self, username, user_id):
-        super().__init__(username, user_id)
+    def __init__(self, username, password, email):
+        super().__init__(username=username, password=password, email=email)
 
     def get_json(self):
         return {
