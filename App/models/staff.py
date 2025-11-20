@@ -1,20 +1,27 @@
 from App.database import db
 from App.models.user import User
-from App.models.shortlist import Shortlist
 
-class Staff(db.Model):
+class Staff(User):
     __tablename__ = 'staff'
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False, unique=True)
-    username =  db.Column(db.String(20), nullable=False, unique=True)
+    id = db.Column(db.Integer, db.ForeignKey('user.id'), primary_key=True)
 
-    def __init__(self, username, user_id):
-        self.username = username
-        self.user_id = user_id
+    shortlist = db.relationship('Shortlist', backref='staff', lazy=True)
 
-    #move this to controllers
-    def add_to_shortlist(self, student_id, position_id):
-        shortlist = Shortlist(student_id=student_id, position_id=position_id, staff_id=self.id)
-        db.session.add(shortlist)
-        db.session.commit()
-        return shortlist
+    __mapper_args__ = {
+        'polymorphic_identity': 'staff',
+    }
+
+    def __init__(self, username, password, email):
+        super().__init__(username=username, password=password, email=email)
+
+    def get_json(self):
+        return {
+            'id': self.id,
+            'username': self.username,
+            'email': self.email,
+            'type': 'staff'
+        }
+
+    def __repr__(self):
+        return f"<Staff with ID {self.id} and username {self.username}>"
+    
