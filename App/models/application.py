@@ -9,17 +9,37 @@ class Application(db.Model):
     id=db.Column(db.Integer, primary_key=True)
     student_id=db.Column(db.Integer, db.ForeignKey('student.id', ondelete='CASCADE'), nullable=False)
     position_id=db.Column(db.Integer, db.ForeignKey('position.id', ondelete='CASCADE'), nullable=False)
+    state_value=db.Column(db.String(50), nullable=False, default="Applied")
+    state = None  # State object to handle state-specific behavior
 
     def __init__(self, student_id, position_id):
         self.student_id=student_id
         self.position_id=position_id
+        self.state = AppliedState()  # Initial state
+        self.state_value = self.state.state_value
 
     def toJSON(self):
         return {
             "id": self.id,
             "student_id": self.student_id,
-            "position_id": self.position_id
+            "position_id": self.position_id,
+            "state": self.state_value
         }
+    
+    def set_State(self, state):
+        self.state = state
+        self.state_value = state.state_value
+        db.session.add(self)
+        db.session.commit()
+
+    def shortlist(self):
+        return self.state.shortlist(self)
+    
+    def reject(self):
+        return self.state.reject(self)
+    
+    def accept(self):
+        return self.state.accept(self)
 
 # class DecisionStatus(enum.Enum): 
 #     accepted = "accepted"
