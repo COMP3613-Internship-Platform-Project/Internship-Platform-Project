@@ -13,6 +13,7 @@ class Position(db.Model):
     number_of_positions = db.Column(db.Integer, default=1) #position closes after this number is filled
     status = db.Column(Enum(PositionStatus, native_enum=False), nullable=False, default=PositionStatus.open) #implement state design pattern 
     employer_id = db.Column(db.Integer, db.ForeignKey('employer.id'), nullable=False)
+    
     employer = db.relationship("Employer", back_populates="positions")
 
     def __init__(self, title, employer_id, number):
