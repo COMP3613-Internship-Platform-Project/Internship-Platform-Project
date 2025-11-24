@@ -7,9 +7,7 @@ class Staff(User):
 
     shortlist = db.relationship('Shortlist', backref='staff', lazy=True)
 
-    __mapper_args__ = {
-        'polymorphic_identity': 'staff',
-    }
+    __mapper_args__ = {'polymorphic_identity': 'staff'}
 
     def __init__(self, username, password, email):
         super().__init__(username=username, password=password, email=email)
