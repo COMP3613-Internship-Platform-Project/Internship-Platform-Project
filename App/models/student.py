@@ -5,13 +5,12 @@ from sqlalchemy.ext.hybrid import hybrid_property
 from datetime import date
 
 class Student(User):
-    __tablename__ = 'student'
-    __mapper_args__ = {'polymorphic_identity':'student'}    
+    __tablename__ = 'student'  
     id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False, unique=True, primary_key=True)
     skills = db.Column(ARRAY(db.String(50)))
+
     application = db.relationship('Application', backref='student', lazy=True, cascade="all, delete-orphan")
    
-
     __mapper_args__ = {'polymorphic_identity':'student'}    
 
     def __init__(self, username, password, email, skills):
