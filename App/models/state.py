@@ -35,3 +35,20 @@ class AppliedState(State): #inital state when student creates application
 
     def accept(self, application):
         raise ValueError("Cannot accept an application that is in Applied state.")
+    
+
+class AcceptedState(State): #final state when application is accepted by employer
+
+    def __init__(self):
+        self.state_value = "Accepted"
+
+    def shortlist(self):
+        raise ValueError("Cannot shortlist an application that is already Accepted.")
+
+    def reject(self, application): #applcation can be rejected by student when accepted by employer
+        application.set_State(RejectedState())
+        return True #successfully rejected
+
+    def accept(self):
+        raise ValueError("Application is already in Accepted state.")
+    
