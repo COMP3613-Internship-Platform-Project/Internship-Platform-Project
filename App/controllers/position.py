@@ -33,4 +33,22 @@ def get_positions_by_employer_json(user_id):
         return [position.toJSON() for position in positions]
     return []
 
+    #MOVED FROM MODELS FILE
 
+    # def update_status(self, status):
+    #     self.status = status
+    #     db.session.commit()
+    #     return self.status
+
+    # def update_number_of_positions(self, number_of_positions):
+    #     self.number_of_positions = number_of_positions
+    #     db.session.commit()
+    #     return self.number_of_positions
+
+    # def delete_position(self):
+    #     db.session.delete(self)
+    #     db.session.commit()
+    #     return
+
+    # def list_positions(self):
+    #     return db.session.query(Position).all()
