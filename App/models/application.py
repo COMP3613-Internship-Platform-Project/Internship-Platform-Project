@@ -1,5 +1,5 @@
 from App.database import db
-from App.models.user import User
+from App.models.user import User, AppliedState
 from sqlalchemy import Enum
 import enum  
 
