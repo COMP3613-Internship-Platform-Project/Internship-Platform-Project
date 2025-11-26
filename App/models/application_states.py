@@ -78,6 +78,5 @@ class RejectedState(State): #final state when application is rejected by employe
     def reject(self):
         raise ValueError("Application is already in Rejected state.")
 
-    def accept(self, application): #application can be accepted by student when rejected by employer
-        application.set_State(AcceptedState())
-        return True #successfully accepted
+    def accept(self, application):
+        raise ValueError("Cannot accept an application that is Rejected.")
