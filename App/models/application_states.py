@@ -44,11 +44,11 @@ class ShortlistedState(State): #intermediate state when application is shortlist
     def shortlist(self):
         raise ValueError("Application is already in Shortlisted state.")
     
-    def reject(self, application): #can go from shortlisted to rejected
+    def reject(self, application): 
         application.set_State(RejectedState())
         return True
     
-    def accept(self, application): #can go from shortlisted to accepted
+    def accept(self, application): 
         application.set_State(AcceptedState())
         return True
     
