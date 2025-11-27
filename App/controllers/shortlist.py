@@ -1,6 +1,7 @@
 from sqlalchemy import false
-from App.models import Shortlist, Position, Staff, Student
+from App.models import Position, Staff, Student
 from App.database import db
+from App.models.shortlist import Shortlist
 
 #add checking for state of position 
 def add_student_to_shortlist(student_id, position_id, staff_id):

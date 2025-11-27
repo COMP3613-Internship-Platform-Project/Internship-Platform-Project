@@ -1,6 +1,17 @@
 from sqlalchemy import false
 from App.models import Position, Student
 from App.database import db
+from sqlalchemy.exc import SQLAlchemyError
+
+def create_student(username: str, password: str, email: str, skills: list):
+    try:
+        student = Student(username=username, password=password, email=email, skills=skills)
+        db.session.add(student)
+        db.session.commit()
+        return student
+    except SQLAlchemyError as e:
+        db.session.rollback()
+        raise Exception(f"Error creating student: {e}")
 
 def get_student_by_user_id(user_id):
     return db.session.query(Student).filter_by(user_id=user_id).first()

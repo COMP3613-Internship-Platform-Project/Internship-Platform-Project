@@ -9,11 +9,6 @@ class State(ABC):
         """Close the position."""
         pass
 
-    @abstractmethod
-    def fill_position(self, position):
-        """Fill the position."""
-        pass
-
 class OpenState(State): #initial state when employer creates position
     def __init__(self):
         self.state_value = "Open"
