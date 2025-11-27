@@ -22,8 +22,8 @@ def open_position(employer_id: int, title: str, number_of_positions: int):
         db.session.commit()
         return position
     except SQLAlchemyError as e:
-        db.session.rollback()
-        return f"Error creating internship position: {e}"
+        db.session.rollback() 
+        raise Exception(f"Error creating internship position: {e}")
 
 #probably don't need this one
 def get_positions_by_employer(user_id):

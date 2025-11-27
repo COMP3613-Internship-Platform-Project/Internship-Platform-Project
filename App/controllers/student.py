@@ -1,5 +1,5 @@
 from sqlalchemy import false
-from App.models import Position, Student
+from App.models import Position, Student, Application
 from App.database import db
 from sqlalchemy.exc import SQLAlchemyError
 

@@ -36,3 +36,6 @@ class Position(db.Model):
     def close_position(self):
         return self.state.close_position(self)
     
+    def reopen_position(self):
+        return self.state.reopen_position(self)
+    

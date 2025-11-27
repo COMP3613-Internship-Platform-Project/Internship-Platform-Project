@@ -35,7 +35,7 @@ class Application(db.Model):
         db.session.commit()
 
     def shortlist_application(self):
-        return self.state.shortlist(self)
+        return self.state.shortlist_application(self)
     
     def reject(self):
         return self.state.reject(self)

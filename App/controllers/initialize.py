@@ -26,6 +26,16 @@ def initialize():
     position2 = open_position(
         int(employer2.id), "Data Analyst", 3
     )
+
+    print(staff.get_json())
+    print(staff2.get_json())
+    print(employer.get_json())
+    print(employer2.get_json())
+    print(student.get_json())
+    print(student2.get_json())
+    print(position.toJSON())
+    print(position2.toJSON())
+
     # open_position(user_id=2, title='Software Engineer', number_of_positions= 6)
     # open_position(user_id=2, title='Mechanical Engineer', number_of_positions= 6)
     # add_student_to_shortlist(student_id=1, position_id=1, staff_id=3)
