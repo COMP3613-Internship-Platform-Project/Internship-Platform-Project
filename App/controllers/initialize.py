@@ -11,14 +11,14 @@ def initialize():
     db.drop_all()
     db.create_all()
 
-    staff = create_staff("sally", "sallypass", "sally@staff.com")
-    staff2 = create_staff("pam", "pampass", "pam@staff.com")
+    staff = create_staff("Sally", "sallypass", "sally@staff.com")
+    staff2 = create_staff("Pam", "pampass", "pam@staff.com")
 
     employer = create_employer("Unit Trust", "password", "unit.trust@unit.com")
-    employer2 = create_employer("evee", "eveepass", "evee@evee.com")
+    employer2 = create_employer("Evee", "eveepass", "evee@evee.com")
 
-    student = create_student("johndoe", "johndoepass", "john.doe@student.com", ["Java", "Python", "React"])
-    student2 = create_student("acelaw", "acepass", "ace.law@student.com", ["R", "Python", "SQL"])
+    student = create_student("Johndoe", "johndoepass", "john.doe@student.com", ["Java", "Python", "React"])
+    student2 = create_student("Acelaw", "acepass", "ace.law@student.com", ["R", "Python", "SQL"])
 
     position = open_position(
         int(employer.id), "Software Engineer", 2

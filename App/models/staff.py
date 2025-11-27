@@ -21,5 +21,5 @@ class Staff(User):
         }
 
     def __repr__(self):
-        return f"<Staff with ID {self.id} and username {self.username}>"
+        return f"<Staff {self.username} with ID {self.id}>"
     

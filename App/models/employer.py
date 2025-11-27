@@ -18,3 +18,6 @@ class Employer(User):
             'positions': [position.toJSON() for position in self.positions]
         })
         return user_json
+    
+    def __repr__(self):
+        return f"<Employer {self.username} with ID {self.id}>"

@@ -15,3 +15,4 @@ instance/temp-database.db
 # Ignore environment files (optional)
 .env
 
+*.db
