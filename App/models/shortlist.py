@@ -6,7 +6,7 @@ class Shortlist(db.Model):
     position_id = db.Column(db.Integer, db.ForeignKey('position.id'), nullable=False) #to verify that this shortlist is for a specific position
     staff_id = db.Column(db.Integer, db.ForeignKey('staff.id'), nullable=False)
 
-    applications = db.relationship('Application', backref=db.backref('shortlist', lazy=True))
+    applications = db.relationship('Application', back_populates='shortlist', lazy=True)
 
     def __init__(self,position_id, staff_id):
         self.position_id = position_id

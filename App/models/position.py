@@ -1,5 +1,5 @@
 from App.database import db
-from App.models.position_states import OpenState
+from App.states import OpenState
 
 class Position(db.Model):
     __tablename__ = 'position'
@@ -35,4 +35,7 @@ class Position(db.Model):
         
     def close_position(self):
         return self.state.close_position(self)
+    
+    def reopen_position(self):
+        return self.state.reopen_position(self)
     

@@ -1,19 +1,29 @@
 from App.models import Position, Employer
 from App.database import db
+from sqlalchemy.exc import SQLAlchemyError
 
-def open_position(user_id, title, number_of_positions=1):
-    employer = Employer.query.filter_by(user_id=user_id).first()
-    if not employer:
-        return None
+def open_position(employer_id: int, title: str, number_of_positions: int):
+    employer: Employer | None = db.session.get(Employer, employer_id)
+    if employer is None:
+        return f"Employer with ID {employer_id} does not exist"
     
-    new_position = Position(title=title, number=number_of_positions, employer_id=employer.id)
-    db.session.add(new_position)
+    existing_position = Position.query.filter_by(
+        title=title, 
+        number_of_positions=number_of_positions, 
+        employer_id=employer.id
+    ).first()
+
+    if existing_position:
+        return f"Internship position already exists"
+    
     try:
+        position = Position(title=title, employer_id=employer.id, number=number_of_positions)
+        db.session.add(position)
         db.session.commit()
-        return new_position
-    except Exception as e:
-        db.session.rollback()
-        return None
+        return position
+    except SQLAlchemyError as e:
+        db.session.rollback() 
+        raise Exception(f"Error creating internship position: {e}")
 
 #probably don't need this one
 def get_positions_by_employer(user_id):

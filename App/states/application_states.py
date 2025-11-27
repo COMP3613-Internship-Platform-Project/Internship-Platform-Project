@@ -1,12 +1,11 @@
 from App.database import db
-from App.models.user import Position
 from abc import ABC, abstractmethod # for state pattern
 
 class State(ABC):
     # Abstract base class for application states
 
     @abstractmethod
-    def shortlist(self, application):
+    def shortlist_application(self, application):
         """Shortlist the application."""
         pass
     
@@ -26,7 +25,7 @@ class AppliedState(State): #inital state when student creates application
     def __init__(self):
         self.state_value = "Applied"
 
-    def shortlist(self, application): #can only go from applied to shortlisted
+    def shortlist_application(self, application): #can only go from applied to shortlisted
         application.set_State(ShortlistedState())
         return True #successfully shortlisted
 

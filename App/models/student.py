@@ -1,13 +1,11 @@
-from ctypes import ARRAY
+from sqlalchemy import JSON
 from App.database import db
-from App.models.user import User
-from sqlalchemy.ext.hybrid import hybrid_property
-from datetime import date
+from App.models import User
 
 class Student(User):
     __tablename__ = 'student'  
     id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False, unique=True, primary_key=True)
-    skills = db.Column(ARRAY(db.String(50)))
+    skills = db.Column(JSON, nullable=False)
 
     application = db.relationship('Application', backref='student', lazy=True, cascade="all, delete-orphan")
    

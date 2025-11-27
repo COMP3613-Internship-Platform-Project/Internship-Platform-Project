@@ -1,16 +1,18 @@
 from App.database import db
-from App.models.user import User, AppliedState
-from sqlalchemy import Enum
-import enum  
+from App.states import AppliedState
 
 #Converted this class to the Application Class
 
 class Application(db.Model):
+    __tablename__ = 'application'
     id=db.Column(db.Integer, primary_key=True)
     student_id=db.Column(db.Integer, db.ForeignKey('student.id', ondelete='CASCADE'), nullable=False)
     position_id=db.Column(db.Integer, db.ForeignKey('position.id', ondelete='CASCADE'), nullable=False)
+    shortlist_id=db.Column(db.Integer, db.ForeignKey('shortlist.id'), nullable=True)
     state_value=db.Column(db.String(50), nullable=False, default="Applied")
     state = None  # State object to handle state-specific behavior
+
+    shortlist = db.relationship('Shortlist', back_populates='applications', lazy=True)
 
     def __init__(self, student_id, position_id):
         self.student_id=student_id
@@ -32,8 +34,8 @@ class Application(db.Model):
         db.session.add(self)
         db.session.commit()
 
-    def shortlist(self):
-        return self.state.shortlist(self)
+    def shortlist_application(self):
+        return self.state.shortlist_application(self)
     
     def reject(self):
         return self.state.reject(self)

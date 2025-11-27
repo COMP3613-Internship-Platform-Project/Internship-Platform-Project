@@ -1,5 +1,5 @@
 from App.database import db
-from App.models.user import User
+from App.models import User
 
 class Employer(User):
     __tablename__ = 'employer'
@@ -11,3 +11,10 @@ class Employer(User):
 
     def __init__(self, username, password, email):
         super().__init__(username, password, email)
+
+    def get_json(self):
+        user_json = super().get_json()
+        user_json.update({
+            'positions': [position.toJSON() for position in self.positions]
+        })
+        return user_json
