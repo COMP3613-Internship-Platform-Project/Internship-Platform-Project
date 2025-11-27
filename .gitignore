@@ -1,7 +1,9 @@
 # Ignore Python bytecode
 # __pycache__/
-# *.pyc
+
 #Ignore all pycache
+*.pyc
+
 
 
 # Ignore test database
@@ -13,4 +15,3 @@ instance/temp-database.db
 # Ignore environment files (optional)
 .env
 
-*.pyc
