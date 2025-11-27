@@ -24,3 +24,25 @@ def create_shortlist(position_id: int, staff_id: int):
     except SQLAlchemyError as e:
         db.session.rollback()
         raise Exception(f"Error creating shortlist: {e}")
+
+def get_shortlist_by_staff(staff_id: int): #Marishel - added function to get shortlists by staff ID
+    try:
+        staff = db.session.get(Staff, staff_id)
+        if not staff:
+            return f"Staff with ID {staff_id} does not exist."
+        
+        shortlists = db.session.query(Shortlist).filter_by(staff_id=staff_id).all()
+        return [shortlist.toJSON() for shortlist in shortlists]
+    except SQLAlchemyError as e:
+        raise Exception(f"Error retrieving shortlists: {e}")
+    
+def get_shortlist_by_position(position_id: int): #Marishel - added function to get shortlists by position ID
+    try:
+        position = db.session.get(Position, position_id)
+        if not position:
+            return f"Position with ID {position_id} does not exist."
+        
+        shortlists = db.session.query(Shortlist).filter_by(position_id=position_id).all()
+        return [shortlist.toJSON() for shortlist in shortlists]
+    except SQLAlchemyError as e:
+        raise Exception(f"Error retrieving shortlists: {e}")
