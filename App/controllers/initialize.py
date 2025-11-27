@@ -1,4 +1,4 @@
-from App.controllers.staff import create_staff
+from App.controllers.staff import create_staff, list_students, view_shortlists, view_positions
 from App.controllers.employer import create_employer
 from App.controllers.student import create_student
 from App.controllers.application import create_application
@@ -47,4 +47,8 @@ def initialize():
     print(application.toJSON())
     print(application2.toJSON())
 
+    # print(list_students(staff.id))
+    # print(view_shortlists(staff.id))
+    # print(view_positions(staff.id))
+    
     # add_student_to_shortlist(student_id=1, position_id=1, staff_id=3)
