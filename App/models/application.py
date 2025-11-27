@@ -1,5 +1,5 @@
 from App.database import db
-from App.states import AppliedState
+from App.models.application_states import AppliedState
 
 #Converted this class to the Application Class
 

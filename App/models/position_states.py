@@ -1,4 +1,3 @@
-from App.database import db
 from abc import ABC, abstractmethod # for state pattern
 
 class State(ABC):

@@ -43,6 +43,11 @@ def get_positions_by_employer_json(user_id):
         return [position.toJSON() for position in positions]
     return []
 
+# MOVED FROM shortlist.py
+
+def get_shortlist_by_position(position_id):
+    return db.session.query(Shortlist).filter_by(position_id=position_id).all()
+
     #MOVED FROM MODELS FILE
 
     # def update_status(self, status):

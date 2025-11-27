@@ -1,5 +1,5 @@
 from App.database import db
-from App.states import OpenState
+from App.models.position_states import OpenState
 
 class Position(db.Model):
     __tablename__ = 'position'

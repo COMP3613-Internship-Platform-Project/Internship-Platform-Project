@@ -1,4 +1,4 @@
-from App import db
+from App.database import db
 from App.models import Employer
 from sqlalchemy.exc import SQLAlchemyError
 

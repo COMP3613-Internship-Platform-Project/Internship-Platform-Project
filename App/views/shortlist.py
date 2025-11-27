@@ -1,6 +1,8 @@
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import jwt_required, current_user
-from App.controllers import ( add_student_to_shortlist, decide_shortlist, get_shortlist_by_student, get_shortlist_by_position)
+from App.controllers.position import get_shortlist_by_position
+from App.controllers.student import get_shortlist_by_student
+from App.controllers.application import add_student_to_shortlist
 
 
 shortlist_views = Blueprint('shortlist_views', __name__)
@@ -36,20 +38,20 @@ def get_student_shortlist(student_id):
     
 
 
-@shortlist_views.route('/api/shortlist',methods = ['PUT'] ) 
-@jwt_required()
-def shortlist_decide():
-    if current_user.role != 'employer':
-        return jsonify({"message": "Unauthorized user"}), 403
+# @shortlist_views.route('/api/shortlist',methods = ['PUT'] ) 
+# @jwt_required()
+# def shortlist_decide():
+#     if current_user.role != 'employer':
+#         return jsonify({"message": "Unauthorized user"}), 403
     
     
-    data = request.json
-    request_result = decide_shortlist(data['student_id'], data['position_id'], data['decision'])
+#     data = request.json
+#     request_result = decide_shortlist(data['student_id'], data['position_id'], data['decision'])
    
-    if request_result:
-        return jsonify(request_result.toJSON()), 200
-    else:
-     return jsonify({"error": "Failed to update shortlist"}), 400
+#     if request_result:
+#         return jsonify(request_result.toJSON()), 200
+#     else:
+#      return jsonify({"error": "Failed to update shortlist"}), 400
     
 
 @shortlist_views.route('/api/shortlist/position/<int:position_id>', methods=['GET'])
