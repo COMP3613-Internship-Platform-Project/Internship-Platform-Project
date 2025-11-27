@@ -25,6 +25,34 @@ def open_position(employer_id: int, title: str, number_of_positions: int):
         db.session.rollback() 
         raise Exception(f"Error creating internship position: {e}")
 
+#Marishel - added employer to close position
+def close_position(position_id: int, employer_id: int): #Marishel - added employer to close position
+    position = db.session.get(Position, position_id)
+    if not position:
+        return f"Position with ID {position_id} does not exist."    
+    
+    if position.employer_id != employer_id:
+        return f"Employer with ID {employer_id} is not authorized to close this position."
+    
+    if position.status == "closed":
+        return f"Position with ID {position_id} is already closed."
+    else:
+        position.close_position()
+        return f"Position with ID {position_id} has been closed." # not sure to return message or position object
+    
+def reopen_position(position_id: int, employer_id: int): #Marishel
+    position = db.session.get(Position, position_id)
+    if not position:
+        return f"Position with ID {position_id} does not exist."    
+    if position.employer_id != employer_id:
+        return f"Employer with ID {employer_id} is not authorized to close this position."
+    if position.status == "open":
+        return f"Position with ID {position_id} is already open."
+    else:
+        position.reopen_position()
+        return f"Position with ID {position_id} has been reopened." # not sure to return message or position object
+
+
 #probably don't need this one
 def get_positions_by_employer(user_id):
     employer = Employer.query.filter_by(user_id=user_id).first()

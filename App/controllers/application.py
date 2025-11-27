@@ -48,3 +48,42 @@ def add_student_to_shortlist(student_id, position_id, staff_id):
         db.session.commit()
         return shortlist
     return False
+
+def get_applications_by_student(student_id): #Marishel - added function to get applications by student ID
+    try:
+        student = db.session.get(Student, student_id)
+        if not student:
+            return f"Student with ID {student_id} does not exist."
+        
+        applications = db.session.query(Application).filter_by(student_id=student_id).all()
+        return [application.toJSON() for application in applications] #did to json for now 
+    except SQLAlchemyError as e:
+        raise Exception(f"Error retrieving applications: {e}")
+    
+def get_application_by_student_and_position(student_id, position_id): #Marishel - added function to get application by student ID and position ID
+    try:
+        student = db.session.get(Student, student_id)
+        position = db.session.get(Position, position_id)
+        if not student:
+            return f"Student with ID {student_id} does not exist."
+        if not position:
+            return f"Position with ID {position_id} does not exist."
+        
+        application = db.session.query(Application).filter_by(student_id=student_id, position_id=position_id).first()
+        if application:
+            return application.toJSON() #did to json for now 
+        else:
+            return f"No application found for Student ID {student_id} and Position ID {position_id}."
+    except SQLAlchemyError as e:
+        raise Exception(f"Error retrieving application: {e}")
+    
+def get_applications_by_position(position_id): #Marishel - added function to get applications by position ID
+    try:
+        position = db.session.get(Position, position_id)
+        if not position:
+            return f"Position with ID {position_id} does not exist."
+        
+        applications = db.session.query(Application).filter_by(position_id=position_id).all()
+        return [application.toJSON() for application in applications] #did to json for now 
+    except SQLAlchemyError as e:
+        raise Exception(f"Error retrieving applications: {e}")
