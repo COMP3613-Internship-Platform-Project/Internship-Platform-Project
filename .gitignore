@@ -8,6 +8,7 @@
 
 # Ignore test database
 instance/temp-database.db
+*.db
 
 # Ignore VS Code settings (optional)
 #.vscode/
@@ -15,4 +16,3 @@ instance/temp-database.db
 # Ignore environment files (optional)
 .env
 
-*.db
