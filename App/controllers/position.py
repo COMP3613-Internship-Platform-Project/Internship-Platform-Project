@@ -1,4 +1,4 @@
-from App.models import Position, Employer
+from App.models import Position, Employer, Shortlist
 from App.database import db
 from sqlalchemy.exc import SQLAlchemyError
 

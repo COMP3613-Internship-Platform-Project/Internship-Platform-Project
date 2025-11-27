@@ -1,4 +1,4 @@
-from App.models import Student
+from App.models import Student, Shortlist
 from App.database import db
 from sqlalchemy.exc import SQLAlchemyError
 
