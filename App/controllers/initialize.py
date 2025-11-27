@@ -1,8 +1,8 @@
 from App.controllers.staff import create_staff
 from App.controllers.employer import create_employer
-from App.controllers.student import create_student, create_application
+from App.controllers.student import create_student
+from App.controllers.application import create_application
 from App.controllers.shortlist import create_shortlist
-from .shortlist import add_student_to_shortlist
 from .position import open_position
 from App.database import db
 
@@ -47,6 +47,4 @@ def initialize():
     print(application.toJSON())
     print(application2.toJSON())
 
-    # open_position(user_id=2, title='Software Engineer', number_of_positions= 6)
-    # open_position(user_id=2, title='Mechanical Engineer', number_of_positions= 6)
     # add_student_to_shortlist(student_id=1, position_id=1, staff_id=3)
