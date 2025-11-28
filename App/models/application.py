@@ -1,5 +1,6 @@
 from App.database import db
-from App.models.application_states import AppliedState
+from App.models.application_states import AppliedState, ShortlistedState, RejectedState, AcceptedState
+from sqlalchemy.orm import reconstructor
 
 #Converted this class to the Application Class
 
@@ -19,6 +20,20 @@ class Application(db.Model):
         self.position_id=position_id
         self.state = AppliedState()  # Initial state
         self.state_value = self.state.state_value
+
+    @reconstructor
+    def init_on_load(self):
+        # Reconstruct the state object based on the stored state_value
+        if self.state_value == "Applied":
+            self.state = AppliedState()
+        elif self.state_value == "Shortlisted":
+            self.state = ShortlistedState()
+        elif self.state_value == "Rejected":
+            self.state = RejectedState()
+        elif self.state_value == "Accepted":
+            self.state = AcceptedState()
+        else:
+            self.state = None  # Unknown state
 
     def toJSON(self):
         return {

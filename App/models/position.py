@@ -1,5 +1,6 @@
 from App.database import db
-from App.models.position_states import OpenState
+from App.models.position_states import OpenState, ClosedState
+from sqlalchemy.orm import reconstructor
 
 class Position(db.Model):
     __tablename__ = 'position'
@@ -17,7 +18,17 @@ class Position(db.Model):
         self.employer_id = employer_id
         self.state = OpenState() #initial state
         self.number_of_positions = number
-        
+    
+    @reconstructor
+    def init_on_load(self):
+        # Reconstruct the state object based on the stored status
+        if self.status == "Open":
+            self.state = OpenState()
+        elif self.status == "Closed":
+            self.state = ClosedState()
+        else:
+            self.state = None  # Unknown state
+
     def toJSON(self):
         return {
             "id": self.id,

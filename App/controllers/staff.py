@@ -125,7 +125,6 @@ def view_applications(staff_id: int):
                 "application_id": application.id,
                 "employer_username": employer_name,
                 "position_title": position_title,
-                "application_status": application.state,
                 "application_state_value": application.state_value,
                 "student_email": student.email if student else "N/A",
                 "student_id": student.id if student else None,
