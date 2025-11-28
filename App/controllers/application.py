@@ -1,7 +1,10 @@
+from App.controllers.shortlist import create_shortlist
 from App.database import db
 from App.models import Position, Student, Application, Staff
 from App.models.shortlist import Shortlist
 from sqlalchemy.exc import SQLAlchemyError
+from App.controllers.shortlist import create_shortlist
+from App.models.application_states import ShortlistedState
 
 def create_application(student_id, position_id):
     try:
@@ -28,27 +31,42 @@ def create_application(student_id, position_id):
         db.session.rollback()
         raise Exception(f"Error creating application: {e}")
     
-# MOVED FROM shortlist.py
 
-#add checking for state of position 
-def add_student_to_shortlist(student_id, position_id, staff_id):
-    teacher = db.session.query(Staff).filter_by(user_id=staff_id).first()
-    student = db.session.query(Student).filter_by(user_id=student_id).first()
-    if student == None or teacher == None:
-        return False
-    list = db.session.query(Shortlist).filter_by(student_id=student.id, position_id=position_id).first()
-    position = db.session.query(Position).filter(
-        Position.id == position_id,
-        Position.number_of_positions > 0,
-        Position.status == "open"
-    ).first()
-    if teacher and not list and position:
-        shortlist = Shortlist(student_id=student.id, position_id=position.id, staff_id=teacher.id, title=position.title)
-        db.session.add(shortlist)
+
+def add_application_to_shortlist(staff_id, application_id):
+    staff = Staff.query.get(staff_id)
+    if not staff:
+        return f"Staff with ID {staff_id} does not exist."
+    
+    application = Application.query.get(application_id)
+    if not application:
+        return f"Application with ID {application_id} does not exist."
+    
+    #check if a shortlist exists for the specific position
+    shortlist = Shortlist.query.filter_by(position_id=application.position_id).first()
+    if not shortlist:
+        shortlist = create_shortlist(application.position_id, staff.id)
+    
+    #check if application is already in shortlist
+    existing_entry = Shortlist.query.filter_by(position_id=application.position_id, staff_id=staff.id).first()
+    if existing_entry and application.shortlist_id == existing_entry.id:
+        return f"Application with ID {application_id} is already in the shortlist for Position ID {application.position_id}."
+    
+    try:
+        application.shortlist_id = shortlist.id
+
+        # ensuring application transition strictly from applied to shortlisted state
+        if application.state_value == "Applied":
+            application.shortlist_application()
+        else:
+            return f"Application with ID {application_id} cannot be shortlisted from state '{application.state_value}'."
+
         db.session.commit()
-        return shortlist
-    return False
-
+        return application
+    except SQLAlchemyError as e:
+        db.session.rollback()
+        raise Exception(f"Error adding application to shortlist: {e}")
+    
 def get_applications_by_student(student_id): #Marishel - added function to get applications by student ID
     try:
         student = db.session.get(Student, student_id)

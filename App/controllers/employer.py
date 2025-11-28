@@ -19,25 +19,32 @@ def create_employer(username: str, password: str, email: str):
         db.session.rollback()
         raise Exception(f"Error creating employer: {e}")
 
-def view_shortlist(employer_id: int, position_id: int):
+def get_shortlists_for_employer(employer_id: int):
     try:
-        #ensure employer and position exist and are related
-        employer: Employer | None = Employer.query.get(employer_id)
+        employer = Employer.query.get(employer_id)
         if not employer:
             return f"Employer with ID {employer_id} does not exist."
-        
-        position: Position | None = Position.query.get(position_id)
-        if not position:
-            return f"Position with ID {position_id} does not exist."
-        
-        if position.employer_id != employer.id:
-            return f"Employer with ID {employer_id} is not authorized to view the shortlist for this position."
-        
-        # retrieve shortlist
-        shortlists = Shortlist.query.filter_by(position_id=position.id).all()
-        return [shortlist.toJSON() for shortlist in shortlists]
+
+        positions = Position.query.filter_by(employer_id=employer_id).all()
+        result = []
+        for position in positions:
+            shortlists = Shortlist.query.filter_by(position_id=position.id).all()
+            for shortlist in shortlists:
+                for application in shortlist.applications:
+                    student = application.student  
+                    result.append({
+                        "position_id": position.id,
+                        "position_title": position.title,
+                        "shortlist_id": shortlist.id,
+                        "application_status": application.state_value,
+                        "student_email": student.email,
+                        "student_id": student.id,
+                        "student_name": student.username,
+                        "student_skills": [skill.name for skill in getattr(student, "skills", [])]
+                    })
+        return result
     except SQLAlchemyError as e:
-        raise Exception(f"Error retrieving shortlist: {e}")
+        raise Exception(f"Error retrieving shortlists: {e}")
 
 def accept_student(employer_id: int, position_id: int, student_id: int):
     try:
@@ -61,6 +68,11 @@ def accept_student(employer_id: int, position_id: int, student_id: int):
         if not application:
             return f"Student with ID {student_id} did not apply for Position ID {position_id}."
         
+        # Check if application is in Shortlisted state
+        if application.state_value != "Shortlisted":
+            return "Only shortlisted applications can be accepted."
+
+        # change application state to Accepted
         try:
             application.state.accept(application)
             db.session.add(application)
@@ -94,6 +106,11 @@ def reject_student(employer_id: int, position_id: int, student_id: int):
         if not application:
             return f"Student with ID {student_id} did not apply for Position ID {position_id}."
         
+        # Check if application is in Shortlisted state
+        if application.state_value != "Shortlisted":
+            return "Only shortlisted applications can be rejected."
+        
+        # change application state to Rejected
         try:
             application.state.reject(application)
             db.session.add(application)
