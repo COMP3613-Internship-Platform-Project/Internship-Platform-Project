@@ -12,8 +12,10 @@ class Application(db.Model):
     state_value=db.Column(db.String(50), nullable=False, default="Applied")
     state = None  # State object to handle state-specific behavior
 
+    student = db.relationship('Student', backref='applications', lazy=True)
+    position = db.relationship('Position', backref='applications', lazy=True)
     shortlist = db.relationship('Shortlist', back_populates='applications', lazy=True)
-
+    
     def __init__(self, student_id, position_id):
         self.student_id=student_id
         self.position_id=position_id

@@ -1,7 +1,6 @@
 from App.models import User, Student, Employer, Staff
 from App.database import db
 
-#This should not exist given that we have a create for each user type, but just getting rid of it breaks the system, so leaving it for now.
 def create_user(username, password, user_type):
     try:
         newuser = User(username=username, password=password, role=user_type)
@@ -26,7 +25,6 @@ def create_user(username, password, user_type):
         db.session.rollback()
         return False
 
-
 def get_user_by_username(username):
     result = db.session.execute(db.select(User).filter_by(username=username))
     return result.scalar_one_or_none()
@@ -41,8 +39,16 @@ def get_all_users_json():
     users = get_all_users()
     if not users:
         return []
-    users = [user.get_json() for user in users]
-    return users
+    
+    return [
+        {
+            "id": user.id,
+            "username": user.username,
+            "email": getattr(user, "email", None),
+            "user_type": getattr(user, "role", None)
+        }
+        for user in users
+    ]
 
 def update_user(id, username):
     user = get_user(id)

@@ -7,7 +7,8 @@ class Shortlist(db.Model):
     # staff_id = db.Column(db.Integer, db.ForeignKey('staff.id'), nullable=False)
 
     applications = db.relationship('Application', back_populates='shortlist', lazy=True)
-
+    position = db.relationship('Position', backref='shortlists', lazy=True)
+    
     def __init__(self,position_id):
         self.position_id = position_id
         # self.staff_id = staff_id
