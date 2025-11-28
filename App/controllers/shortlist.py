@@ -3,13 +3,10 @@ from App.database import db
 from App.models.shortlist import Shortlist
 from sqlalchemy.exc import SQLAlchemyError
 
-def create_shortlist(position_id: int, staff_id: int): #Marishel - still kept staff id to create as only staff could shortlist
+def create_shortlist(position_id: int): #Marishel - still kept staff id to create as only staff could shortlist
     try:
-        staff = Staff.query.get(staff_id)
         position = Position.query.get(position_id)
 
-        if not staff:
-            return f"Staff with ID {staff_id} does not exist."
         if not position:
             return f"Position with ID {position_id} does not exist."
         

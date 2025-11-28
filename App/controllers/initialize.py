@@ -1,4 +1,4 @@
-from App.controllers.staff import create_staff, list_students, view_shortlists, view_positions
+from App.controllers.staff import create_staff, list_students, view_shortlists, view_positions, view_shortlist_by_position, view_applications, view_applications_by_position
 from App.controllers.employer import create_employer
 from App.controllers.student import create_student
 from App.controllers.application import create_application
@@ -28,8 +28,6 @@ def initialize():
         int(employer2.id), "Data Analyst", 3
     )
 
-    # shortlist = create_shortlist(int(position.id), int(staff.id))
-    # shortlist2 = create_shortlist(int(position2.id), int(staff2.id))
     shortlist = create_shortlist(int(position.id)) # Marishel added this wihout staff ID
     shortlist2 = create_shortlist(int(position2.id))
 
@@ -42,6 +40,9 @@ def initialize():
     print(employer2.get_json())
     print(student.get_json())
     print(student2.get_json())
+
+    print("Testing Position, Shortlist and Application Creation:")
+
     print(position.toJSON())
     print(position2.toJSON())
     print(shortlist.toJSON())
@@ -49,8 +50,16 @@ def initialize():
     print(application.toJSON())
     print(application2.toJSON())
 
-    # print(list_students(staff.id))
-    # print(view_shortlists(staff.id))
-    # print(view_positions(staff.id))
-    
-    # add_student_to_shortlist(student_id=1, position_id=1, staff_id=3)
+    print("Testing Staff Functions:")
+    print("Listing Students:")
+    print(list_students(staff.id))
+    print("Viewing Shortlists:")
+    print(view_shortlists(staff.id))
+    print("Viewing Positions:")
+    print(view_positions(staff.id))
+    print("Viewing Shortlist by Position:")
+    print(view_shortlist_by_position(staff.id, position.id))
+    print("Viewing Applications:")
+    print(view_applications(staff.id))
+    print("Viewing Applications by Position:")
+    print(view_applications_by_position(staff.id, position.id))
