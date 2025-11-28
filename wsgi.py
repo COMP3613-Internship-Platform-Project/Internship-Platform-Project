@@ -5,7 +5,9 @@ from App.database import db, get_migrate
 from App.main import create_app
 from App.controllers import ( create_user, get_all_users_json, get_all_users, initialize, open_position, get_positions_by_employer)
 from App.controllers.position import get_shortlist_by_position
-from App.controllers.student import  student_reject_position
+from App.controllers.student import  create_student, student_reject_position
+from App.controllers.employer import create_employer
+from App.controllers.staff import create_staff
 from App.controllers.application import get_applications_by_student, create_application
 
 
@@ -36,17 +38,30 @@ def list_user_command(format):
 #create student
 @user_cli.command("create-student", help="Creates a student user")
 def create_student_command():
-    pass
+    username = click.prompt("Enter username")
+    password = click.prompt("Enter password")
+    email = click.prompt("Enter email")
+    skills = click.prompt("Enter skills (comma separated)").split(",")
+    student = create_student(username, password, email, skills)
+    print(f'Student {student.username} created with ID: {student.id}')
 
 #create staff
 @user_cli.command("create-staff", help="Creates a staff user")
 def create_staff_command():
-    pass
+    username = click.prompt("Enter username")
+    password = click.prompt("Enter password")
+    email = click.prompt("Enter email")
+    staff = create_staff(username, password, email)
+    print(f'Staff {staff.username} created with ID: {staff.id}')
 
 #create employer
 @user_cli.command("create-employer", help="Creates an employer user")
 def create_employer_command():
-    pass
+    username = click.prompt("Enter username")
+    password = click.prompt("Enter password")
+    email = click.prompt("Enter email")
+    employer = create_employer(username, password, email)
+    print(f'Employer {employer.username} created with ID: {employer.id}')
 
 
 app.cli.add_command(user_cli) # add the group to the cli
@@ -77,7 +92,7 @@ def get_applications_command(student_id):
         for app in applications:
             print(app)
 
-#we don't have any applications shortlisted yet, nor do we have a get_shorlist_by_student as yet
+#we don't have any applications shortlisted yet, nor do we have a get_shorlist_by_student/application as yet
 @student_cli.command("get-shortlists", help="Gets all shortlists for a student")
 @click.argument("student_id", default=5)
 def get_shortlist_command(student_id):
