@@ -62,7 +62,7 @@ def accept_student(employer_id: int, position_id: int, student_id: int):
             return f"Student with ID {student_id} did not apply for Position ID {position_id}."
         
         try:
-            application.state = AcceptedState()
+            application.state.accept(application)
             db.session.add(application)
             db.session.commit()
         except Exception as e:
@@ -95,7 +95,7 @@ def reject_student(employer_id: int, position_id: int, student_id: int):
             return f"Student with ID {student_id} did not apply for Position ID {position_id}."
         
         try:
-            application.state = RejectedState()
+            application.state.reject(application)
             db.session.add(application)
             db.session.commit()
         except Exception as e:
