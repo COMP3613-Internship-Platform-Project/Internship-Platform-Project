@@ -1,13 +1,14 @@
 import click, pytest, sys
 from flask.cli import with_appcontext, AppGroup
+from rich.console import Console
+from rich.table import Table
 
 from App.database import db, get_migrate
-from App.models import User
 from App.main import create_app
 from App.controllers import ( create_user, get_all_users_json, get_all_users, initialize, open_position, get_positions_by_employer)
 from App.controllers.position import get_shortlist_by_position
 from App.controllers.student import get_shortlist_by_student
-from App.controllers.application import add_student_to_shortlist
+from App.controllers.application import add_student_to_shortlist, get_applications_by_student,create_application
 
 
 # This commands file allow you to create convenient CLI commands for testing controllers
@@ -56,6 +57,37 @@ student_cli = AppGroup('student', help='Student object commands')
 
 #Commands go here
 
+@student_cli.command("create-application", help="Creates an application for a student to a position")
+@click.argument("student_id", default=5)
+@click.argument("position_id", default=2)
+def create_application_command(student_id, position_id):
+    application = create_application(student_id, position_id)
+    if isinstance(application, str):
+        print(application)
+    else:
+        print(f'Application created for Student ID {student_id} to Position ID {position_id}')
+
+@student_cli.command("get-applications", help="Gets all applications for a student")
+@click.argument("student_id", default=5)
+def get_applications_command(student_id):
+    applications = get_applications_by_student(student_id)
+    if applications:
+        for app in applications:
+            print(app)
+
+#broken atm
+@student_cli.command("get-shortlists", help="Gets all shortlists for a student")
+@click.argument("student_id", default=5)
+def get_shortlist_command(student_id):
+    shortlists = get_shortlist_by_student(student_id)
+    if shortlists:
+        for app in shortlists:
+            print(app)
+
+
+
+
+
 #This needs to be checked
 @student_cli.command("get_shortlist", help="Gets a shortlist for a student")
 @click.argument("student_id", default=1)
@@ -70,7 +102,7 @@ def get_shortlist_command(student_id):
         print(f'Student {student_id} has no shortlists')
         print("\n\n__________________________________________________________________________\n\n")
 
-app.cli.add_command(user_cli) # add the group to the cli
+app.cli.add_command(student_cli) # add the group to the cli
 
 '''
 Staff Commands
@@ -96,7 +128,7 @@ def add_to_shortlist_command(student_id, position_id, staff_id):
         print(f'    There is no more open slots for position {position_id}')
         print("\n\n__________________________________________________________________________\n\n")
 
-app.cli.add_command(user_cli) # add the group to the cli
+app.cli.add_command(staff_cli) # add the group to the cli
 
 '''
 Employer Commands
@@ -131,7 +163,7 @@ def decide_shortlist_command(student_id, position_id, decision):
         print(f'Student {student_id} not in shortlist for position {position_id}')
         print("\n\n__________________________________________________________________________\n\n")
 
-app.cli.add_command(user_cli) # add the group to the cli
+app.cli.add_command(employer_cli) # add the group to the cli
 
 
 
