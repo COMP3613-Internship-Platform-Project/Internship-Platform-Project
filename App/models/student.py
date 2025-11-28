@@ -23,6 +23,9 @@ class Student(User):
         })
         return user_json
 
+    def __repr__(self):
+        return f"<Student {self.username} with ID {self.id}>"
+    
 #    def update_DOB(self, date):
 #        self.DOB = date
 #        db.session.commit()
