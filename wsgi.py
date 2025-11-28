@@ -4,7 +4,7 @@ from flask.cli import with_appcontext, AppGroup
 from App.database import db, get_migrate
 from App.main import create_app
 from App.controllers import ( create_user, get_all_users_json, get_all_users, initialize, open_position, get_positions_by_employer)
-from App.controllers.position import get_shortlist_by_position
+from App.controllers.position import get_shortlist_by_position, create_position
 from App.controllers.student import  create_student, student_reject_position
 from App.controllers.employer import create_employer
 from App.controllers.staff import create_staff, view_positions, list_students, view_shortlists, view_shortlist_by_position, view_applications, view_applications_by_position
@@ -202,8 +202,16 @@ def view_employer_shortlists_command():
 
 #Creates a new position
 @employer_cli.command("position", help="Creates a position")
-def create_position_command():
-    pass
+@click.argument("employer_id", default=3)
+@click.argument("title", default="Internship Position")
+@click.argument("number_of_positions", default=5)
+def create_position_command(employer_id, title, number_of_positions):
+    position = create_position(employer_id, title, number_of_positions)
+    if isinstance(position, str):
+        print(position)
+    else:
+        print(f'Position {position.title} created with ID: {position.id}')
+    
 
 #Accept a student application from a shortlist
 @employer_cli.command("accept", help="Accepts an application from a shortlist")
