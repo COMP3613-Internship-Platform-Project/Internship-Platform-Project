@@ -1,6 +1,7 @@
 from App.models import Student, Shortlist
 from App.database import db
 from sqlalchemy.exc import SQLAlchemyError
+from App.models.application import Application
 
 def create_student(username: str, password: str, email: str, skills: list):
     try:
@@ -12,11 +13,47 @@ def create_student(username: str, password: str, email: str, skills: list):
         db.session.rollback()
         raise Exception(f"Error creating student: {e}")
 
-def get_student_by_user_id(user_id):
-    return db.session.query(Student).filter_by(user_id=user_id).first()
-
-# Moved from shortlist.py
-def get_shortlist_by_student(student_id):
-    student = db.session.query(Student).filter_by(user_id=student_id).first()
-    return db.session.query(Shortlist).filter_by(student_id=student.id).all()
-
+def view_my_shortlist(student_id):
+    try:
+        student: Student | None = Student.query.get(student_id)
+        if not student:
+            return f"Student with ID {student_id} does not exist."
+        
+        shortlists = Shortlist.query.filter_by(student_id=student.id).all()
+        result = []
+        for shortlist in shortlists:
+            position = shortlist.position
+            employer = position.employer if position else None
+            application = Application.query.filter_by(student_id=student.id, position_id=position.id).first() if position else None
+            result.append({
+                "employer_name": employer.username if employer else None,
+                "position_title": position.title if position else None,
+                "application_status": application.status if application else None,
+                "student_id": str(student.id),
+                "student_name": student.username,
+                "student_email": student.email,
+                "student_skills": student.skills if isinstance(student.skills, list) else []
+            })
+        return result
+    except SQLAlchemyError as e:
+        raise Exception(f"Error retrieving student's shortlist: {e}")
+    
+def student_reject_position(student_id, position_id):
+    try:
+        student: Student | None = Student.query.get(student_id)
+        if not student:
+            return f"Student with ID {student_id} does not exist."
+        
+        application = Application.query.filter_by(student_id=student.id, position_id=position_id).first()
+        if not application:
+            return f"No application found for Student ID {student_id} and Position ID {position_id}."
+        
+        if application.state_value != "Accepted":
+            return f"Application is not in an accepted state; cannot reject."
+        
+        application.state.reject(application)
+        db.session.commit()
+        return f"Student ID {student_id} has rejected Position ID {position_id}."
+    except SQLAlchemyError as e:
+        db.session.rollback()
+        raise Exception(f"Error processing rejection: {e}")
