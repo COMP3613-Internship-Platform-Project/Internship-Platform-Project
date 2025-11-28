@@ -19,7 +19,7 @@ def create_employer(username: str, password: str, email: str):
         db.session.rollback()
         raise Exception(f"Error creating employer: {e}")
 
-def get_shortlists_for_employer(employer_id: int):
+def get_shortlisted_applications_for_employer(employer_id: int):
     try:
         employer = Employer.query.get(employer_id)
         if not employer:
@@ -28,23 +28,22 @@ def get_shortlists_for_employer(employer_id: int):
         positions = Position.query.filter_by(employer_id=employer_id).all()
         result = []
         for position in positions:
-            shortlists = Shortlist.query.filter_by(position_id=position.id).all()
-            for shortlist in shortlists:
-                for application in shortlist.applications:
-                    student = application.student  
-                    result.append({
-                        "position_id": position.id,
-                        "position_title": position.title,
-                        "shortlist_id": shortlist.id,
-                        "application_status": application.state_value,
-                        "student_email": student.email,
-                        "student_id": student.id,
-                        "student_name": student.username,
-                        "student_skills": [skill.name for skill in getattr(student, "skills", [])]
-                    })
+            # Get applications for the employer's position/s that are in the "Shortlisted" state
+            applications = Application.query.filter_by(position_id=position.id, state_value="Shortlisted").all()
+            for application in applications:
+                student = application.student 
+                result.append({
+                    "position_id": position.id,
+                    "position_title": position.title,
+                    "application_status": application.state_value,
+                    "student_email": student.email,
+                    "student_id": student.id,
+                    "student_name": student.username,
+                    "student_skills": student.skills if isinstance(student.skills, list) else []
+                })
         return result
     except SQLAlchemyError as e:
-        raise Exception(f"Error retrieving shortlists: {e}")
+        raise Exception(f"Error retrieving shortlisted applications: {e}")
 
 def accept_student(employer_id: int, position_id: int, student_id: int):
     try:
