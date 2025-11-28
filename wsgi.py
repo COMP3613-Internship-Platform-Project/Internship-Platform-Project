@@ -97,7 +97,7 @@ def get_applications_command(student_id):
 @student_cli.command("get-shortlists", help="Gets all shortlists for a student")
 @click.argument("student_id", default=5)
 def get_shortlist_command(student_id):
-    shortlists = get_shortlist_by_student(student_id)
+    shortlists = view_my_shortlisted_applications(student_id)
     if shortlists:
         for app in shortlists:
             print(app)
