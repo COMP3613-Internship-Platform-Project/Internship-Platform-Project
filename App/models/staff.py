@@ -4,8 +4,8 @@ from App.models import User
 class Staff(User):
     __tablename__ = 'staff'
     id = db.Column(db.Integer, db.ForeignKey('user.id'), primary_key=True)
-
-    shortlist = db.relationship('Shortlist', backref='staff', lazy=True)
+    shortlist_id = db.Column(db.Integer, db.ForeignKey('shortlist.id'))
+    # shortlist = db.relationship('Shortlist', backref='staff', lazy=True)
 
     __mapper_args__ = {'polymorphic_identity': 'staff'}
 
