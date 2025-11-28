@@ -3,12 +3,13 @@ from flask.cli import with_appcontext, AppGroup
 
 from App.database import db, get_migrate
 from App.main import create_app
-from App.controllers import ( create_user, get_all_users_json, get_all_users, initialize, open_position, get_positions_by_employer)
-from App.controllers.position import get_shortlist_by_position
-from App.controllers.student import  create_student, student_reject_position
-from App.controllers.employer import create_employer
-from App.controllers.staff import create_staff, view_positions, list_students, view_shortlists, view_shortlist_by_position, view_applications, view_applications_by_position
-from App.controllers.application import get_applications_by_student, create_application,add_application_to_shortlist
+from App.controllers.__init__ import *
+# from App.controllers.initialize import  initialize
+# from App.controllers.position import get_shortlist_by_position, create_position
+# from App.controllers.student import  create_student, student_reject_position
+# from App.controllers.employer import create_employer, get_shortlisted_applications_for_employer, accept_student, reject_student
+# from App.controllers.staff import create_staff, view_positions, list_students, view_shortlists, view_shortlist_by_position, view_applications, view_applications_by_position
+# from App.controllers.application import get_applications_by_student, create_application,add_application_to_shortlist
 
 
 # This commands file allow you to create convenient CLI commands for testing controllers
@@ -197,23 +198,45 @@ employer_cli = AppGroup('employer', help='Employer object commands')
 
 #List all employer shortlists, probably should have one to look at shortlists by position too
 @employer_cli.command("shortlists", help="Views all employer shortlists")
-def view_employer_shortlists_command():
-    pass
+@click.argument("employer_id", default=3)
+def view_employer_shortlists_command(employer_id):
+    shortlists = get_shortlisted_applications_for_employer(employer_id)
+    if shortlists:
+        for shortlist in shortlists:
+            print(shortlist)
 
 #Creates a new position
 @employer_cli.command("position", help="Creates a position")
-def create_position_command():
-    pass
+@click.argument("employer_id", default=3)
+@click.argument("title", default="Internship Position")
+@click.argument("number_of_positions", default=5)
+def create_position_command(employer_id, title, number_of_positions):
+    position = create_position(employer_id, title, number_of_positions)
+    if isinstance(position, str):
+        print(position)
+    else:
+        print(f'Position {position.title} created with ID: {position.id}')
+    
 
 #Accept a student application from a shortlist
 @employer_cli.command("accept", help="Accepts an application from a shortlist")
-def accept_shortlist_command():
-    pass
+@click.argument("employer_id", default=3)
+@click.argument("position_id", default=1)
+@click.argument("student_id", default=5)
+def accept_shortlist_command(employer_id, position_id, student_id):
+    application = accept_student(employer_id, position_id, student_id)
+    if isinstance(application, str):
+        print(application)
 
 #Rejects a student application from a shortlist
 @employer_cli.command("reject", help="Rejects an application from a shortlist")
-def reject_shortlist_command():
-    pass
+@click.argument("employer_id", default=3)
+@click.argument("position_id", default=1)
+@click.argument("student_id", default=5)
+def reject_shortlist_command(employer_id, position_id, student_id):
+    application = reject_student(employer_id, position_id, student_id)
+    if isinstance(application, str):
+        print(application)
 
 app.cli.add_command(employer_cli) # add the group to the cli        
 

@@ -7,7 +7,7 @@ class Student(User):
     id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False, unique=True, primary_key=True)
     skills = db.Column(JSON, nullable=False)
 
-    application = db.relationship('Application', backref='student', lazy=True, cascade="all, delete-orphan")
+    applications = db.relationship('Application', back_populates='student', lazy=True)
    
     __mapper_args__ = {'polymorphic_identity':'student'}    
 
@@ -26,15 +26,3 @@ class Student(User):
     def __repr__(self):
         return f"<Student {self.username} with ID {self.id}>"
     
-#    def update_DOB(self, date):
-#        self.DOB = date
-#        db.session.commit()
-#        return self.DOB
-#        
-#   @hybrid_property
-#   def age(self):
-#       if self.DOB is None:
-#           return None
-#       today = date.today()
-#       dob = self.DOB
-#       return today.year - dob.year - ((today.month, today.day) < (dob.month, dob.day))

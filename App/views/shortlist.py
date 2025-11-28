@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import jwt_required, current_user
-from App.controllers.position import get_shortlist_by_position
+# from App.controllers.position import get_shortlist_by_position
 # from App.controllers.student import get_shortlist_by_student
 from App.controllers.application import add_application_to_shortlist
 

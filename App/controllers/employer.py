@@ -76,6 +76,7 @@ def accept_student(employer_id: int, position_id: int, student_id: int):
             application.state.accept(application)
             db.session.add(application)
             db.session.commit()
+            return f"Application for Student ID {student_id} to Position ID {position_id} has been accepted."
         except Exception as e:
             db.session.rollback()
             return f"Error updating application status: {e}"        
@@ -114,6 +115,7 @@ def reject_student(employer_id: int, position_id: int, student_id: int):
             application.state.reject(application)
             db.session.add(application)
             db.session.commit()
+            return f"Application for Student ID {student_id} to Position ID {position_id} has been rejected."
         except Exception as e:
             db.session.rollback()
             return f"Error updating application status: {e}"
