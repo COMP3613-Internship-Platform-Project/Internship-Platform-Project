@@ -39,7 +39,7 @@ class ShortlistedState(State): #intermediate state when application is shortlist
     def __init__(self):
         self.state_value = "Shortlisted"
 
-    def shortlist(self):
+    def shortlist_application(self):
         raise ValueError("Application is already in Shortlisted state.")
     
     def reject(self, application): 
@@ -55,7 +55,7 @@ class AcceptedState(State): #final state when application is accepted by employe
     def __init__(self):
         self.state_value = "Accepted"
 
-    def shortlist(self):
+    def shortlist_application(self):
         raise ValueError("Cannot shortlist an application that is already Accepted.")
 
     def reject(self, application): #applcation can be rejected by student when accepted by employer
