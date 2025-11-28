@@ -7,8 +7,8 @@ from App.database import db, get_migrate
 from App.main import create_app
 from App.controllers import ( create_user, get_all_users_json, get_all_users, initialize, open_position, get_positions_by_employer)
 from App.controllers.position import get_shortlist_by_position
-from App.controllers.student import get_shortlist_by_student
-from App.controllers.application import add_student_to_shortlist, get_applications_by_student,create_application
+from App.controllers.student import  student_reject_position
+from App.controllers.application import get_applications_by_student, create_application
 
 
 # This commands file allow you to create convenient CLI commands for testing controllers
@@ -35,20 +35,24 @@ def list_user_command(format):
     else:
         print(get_all_users_json())
 
-# This is to be deleted
-# @user_cli.command("create", help="Creates a user")
-# @click.argument("username", default="rob")
-# @click.argument("password", default="robpass")
-# @click.argument("user_type", default="student")
-# def create_user_command(username, password, user_type):
-#     result = create_user(username, password, user_type)
-#     if result:
-#         print(f'{username} created!')
-#     else:
-#         print("User creation failed")
+#create student
+@user_cli.command("create-student", help="Creates a student user")
+def create_student_command():
+    pass
+
+#create staff
+@user_cli.command("create-staff", help="Creates a staff user")
+def create_staff_command():
+    pass
+
+#create employer
+@user_cli.command("create-employer", help="Creates an employer user")
+def create_employer_command():
+    pass
 
 
 app.cli.add_command(user_cli) # add the group to the cli
+
 
 '''
 Student Commands
@@ -75,7 +79,7 @@ def get_applications_command(student_id):
         for app in applications:
             print(app)
 
-#broken atm
+#we don't have any applications shortlisted yet, nor do we have a get_shorlist_by_student as yet
 @student_cli.command("get-shortlists", help="Gets all shortlists for a student")
 @click.argument("student_id", default=5)
 def get_shortlist_command(student_id):
@@ -84,133 +88,89 @@ def get_shortlist_command(student_id):
         for app in shortlists:
             print(app)
 
-
-
-
-
-#This needs to be checked
-@student_cli.command("get_shortlist", help="Gets a shortlist for a student")
-@click.argument("student_id", default=1)
-def get_shortlist_command(student_id):
-    list = get_shortlist_by_student(student_id)
-    if list:
-        for item in list:
-            print(f'Student {item.student_id} is {item.status.value} for position {item.position_id}')
-
-        print("\n\n__________________________________________________________________________\n\n")
-    else:
-        print(f'Student {student_id} has no shortlists')
-        print("\n\n__________________________________________________________________________\n\n")
+@student_cli.command("reject-position", help="Student rejects a position they have accepted")
+@click.argument("student_id", default=5)
+@click.argument("position_id", default=1)
+def reject_position_command(student_id, position_id):
+    result = student_reject_position(student_id, position_id)
+    print(result)
 
 app.cli.add_command(student_cli) # add the group to the cli
+
 
 '''
 Staff Commands
 '''
 staff_cli = AppGroup('staff', help='Staff object commands') 
 
-#Commands go here
+#List all positions
+@staff_cli.command("positions", help="Lists all positions")
+def list_positions_command():
+    pass
 
-#This needs to be checked
+#List all Students
+@staff_cli.command("students", help="Lists all students")
+def list_students_command():
+    pass
+
+#List all applications
+@staff_cli.command("applications", help="Views all applications")
+def view_applications_command():
+    pass
+
+#List all applications for a position
+@staff_cli.command("applications-by-position", help="Views all applications for a position")
+@click.argument("position_id", default=1)
+def view_applications_by_position_command(position_id):
+    pass
+
+#List all shortlists
+@staff_cli.command("shortlists", help="Views all shortlists")
+def view_shortlists_command():
+    pass
+
+#List all shortlists for a position
+@staff_cli.command("shortlists-by-position", help="Views all applications for a position")
+@click.argument("position_id", default=1)
+def view_shortlists_by_position_command(position_id):
+    pass
+
+#Add an application to a shortlist
 @staff_cli.command("add_to_shortlist", help="Adds a student to a shortlist")
 @click.argument("student_id", default=1)
 @click.argument("position_id", default=1)
-@click.argument("staff_id", default=1)
-def add_to_shortlist_command(student_id, position_id, staff_id):
-    test = add_student_to_shortlist(student_id, position_id, staff_id)
-    if test:
-        print(f'Student {student_id} added to shortlist for position {position_id}')
-        print("\n\n__________________________________________________________________________\n\n")
-    else:
-        print('One of the following is the issue:')
-        print(f'    Position {position_id} is not open')
-        print(f'    Student {student_id} already in shortlist for position {position_id}')
-        print(f'    There is no more open slots for position {position_id}')
-        print("\n\n__________________________________________________________________________\n\n")
+def add_to_shortlist_command(student_id, position_id):
+    pass
 
 app.cli.add_command(staff_cli) # add the group to the cli
+
 
 '''
 Employer Commands
 '''
 employer_cli = AppGroup('employer', help='Employer object commands') 
 
-#Commands go here
+#List all employer shortlists, probably should have one to look at shortlists by position too
+@employer_cli.command("shortlists", help="Views all employer shortlists")
+def view_employer_shortlists_command():
+    pass
 
-#This needs to be checked
-@employer_cli.command("add_position", help="Adds a position")
-@click.argument("title", default="Software Engineer")
-@click.argument("employer_id", default=1)
-@click.argument("number", default=1)
-def add_position_command(title, employer_id, number):
-    position = open_position(title, employer_id, number)
-    if position:
-        print(f'{title} created!')
-    else:
-        print(f'Employer {employer_id} does not exist')
+#Creates a new position
+@employer_cli.command("position", help="Creates a position")
+def create_position_command():
+    pass
 
-#Needs to be revised
-@employer_cli.command("decide_shortlist", help="Decides on a shortlist")
-@click.argument("student_id", default=1)
-@click.argument("position_id", default=1)
-@click.argument("decision", default="accepted")
-def decide_shortlist_command(student_id, position_id, decision):
-    test = decide_shortlist(student_id, position_id, decision)
-    if test:
-        print(f'Student {student_id} is {decision} for position {position_id}')
-        print("\n\n__________________________________________________________________________\n\n")
-    else:
-        print(f'Student {student_id} not in shortlist for position {position_id}')
-        print("\n\n__________________________________________________________________________\n\n")
+#Accept a student application from a shortlist
+@employer_cli.command("accept", help="Accepts an application from a shortlist")
+def accept_shortlist_command():
+    pass
 
-app.cli.add_command(employer_cli) # add the group to the cli
+#Rejects a student application from a shortlist
+@employer_cli.command("reject", help="Rejects an application from a shortlist")
+def reject_shortlist_command():
+    pass
 
-
-
-#I believe the following 2 commands are done by different user types? Will double check later.
-
-@user_cli.command("get_shortlist_by_position", help="Gets a shortlist for a position")
-@click.argument("position_id", default=1)
-def get_shortlist_by_position_command(position_id):
-    list = get_shortlist_by_position(position_id)
-    if list:
-        for item in list:
-            print(f'Student {item.student_id} is {item.status.value} for {item.position.title} id: {item.position_id}')
-            print(f'    Staff {item.staff_id} added this student to the shortlist')
-            print(f'    Position {item.position_id} is {item.position.status.value}')
-            print(f'    Position {item.position_id} has {item.position.number_of_positions} slots')
-            print(f'    Position {item.position_id} is for {item.position.title}')
-            print("\n\n__________________________________________________________________________\n\n")
-
-    else:
-        print(f'Position {position_id} has no shortlists')
-        print("\n\n__________________________________________________________________________\n\n")
-
-
-
-
-@user_cli.command("get_positions_by_employer", help="Gets all positions for an employer")
-@click.argument("employer_id", default=1)
-def get_positions_by_employer_command(employer_id):
-    list = get_positions_by_employer(employer_id)
-    if list:
-        for item in list:
-            print(f'Position {item.id} is {item.status.value}')
-            print(f'    Position {item.id} has {item.number_of_positions} slots')
-            print(f'    Position {item.id} is for {item.title}')
-            print("\n\n__________________________________________________________________________\n\n")
-    else:
-            print(f'Employer {employer_id} has no positions')
-            print("\n\n__________________________________________________________________________\n\n")
-
-
-
-
-
-
-
-
-            
+app.cli.add_command(employer_cli) # add the group to the cli        
 
 
 '''
