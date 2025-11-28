@@ -5,8 +5,10 @@ from App.database import db, get_migrate
 from App.main import create_app
 from App.controllers import ( create_user, get_all_users_json, get_all_users, initialize, open_position, get_positions_by_employer)
 from App.controllers.position import get_shortlist_by_position
-from App.controllers.student import  student_reject_position
-from App.controllers.application import get_applications_by_student, create_application
+from App.controllers.student import  create_student, student_reject_position
+from App.controllers.employer import create_employer
+from App.controllers.staff import create_staff, view_positions, list_students, view_shortlists, view_shortlist_by_position, view_applications, view_applications_by_position
+from App.controllers.application import get_applications_by_student, create_application,add_application_to_shortlist
 
 
 # This commands file allow you to create convenient CLI commands for testing controllers
@@ -36,17 +38,30 @@ def list_user_command(format):
 #create student
 @user_cli.command("create-student", help="Creates a student user")
 def create_student_command():
-    pass
+    username = click.prompt("Enter username")
+    password = click.prompt("Enter password")
+    email = click.prompt("Enter email")
+    skills = click.prompt("Enter skills (comma separated)").split(",")
+    student = create_student(username, password, email, skills)
+    print(f'Student {student.username} created with ID: {student.id}')
 
 #create staff
 @user_cli.command("create-staff", help="Creates a staff user")
 def create_staff_command():
-    pass
+    username = click.prompt("Enter username")
+    password = click.prompt("Enter password")
+    email = click.prompt("Enter email")
+    staff = create_staff(username, password, email)
+    print(f'Staff {staff.username} created with ID: {staff.id}')
 
 #create employer
 @user_cli.command("create-employer", help="Creates an employer user")
 def create_employer_command():
-    pass
+    username = click.prompt("Enter username")
+    password = click.prompt("Enter password")
+    email = click.prompt("Enter email")
+    employer = create_employer(username, password, email)
+    print(f'Employer {employer.username} created with ID: {employer.id}')
 
 
 app.cli.add_command(user_cli) # add the group to the cli
@@ -77,7 +92,7 @@ def get_applications_command(student_id):
         for app in applications:
             print(app)
 
-#we don't have any applications shortlisted yet, nor do we have a get_shorlist_by_student as yet
+#we don't have any applications shortlisted yet, nor do we have a get_shorlist_by_student/application as yet
 @student_cli.command("get-shortlists", help="Gets all shortlists for a student")
 @click.argument("student_id", default=5)
 def get_shortlist_command(student_id):
@@ -103,42 +118,74 @@ staff_cli = AppGroup('staff', help='Staff object commands')
 
 #List all positions
 @staff_cli.command("positions", help="Lists all positions")
-def list_positions_command():
-    pass
+@click.argument("staff_id",default=1)
+def list_positions_command(staff_id):
+    positions = view_positions(staff_id)
+    if positions:
+        for position in positions:
+            print(position)
+
+    
 
 #List all Students
 @staff_cli.command("students", help="Lists all students")
-def list_students_command():
-    pass
+@click.argument("staff_id", default=1)
+def list_students_command(staff_id):
+    students = list_students(staff_id)
+    if students:
+        for student in students:
+            print(student)
+
 
 #List all applications
 @staff_cli.command("applications", help="Views all applications")
-def view_applications_command():
-    pass
+@click.argument("staff_id", default=1)
+def view_applications_command(staff_id):
+    applications = view_applications(staff_id)
+    if applications:
+        for application in applications:
+            print(application)
 
 #List all applications for a position
 @staff_cli.command("applications-by-position", help="Views all applications for a position")
+@click.argument("staff_id", default=1)
 @click.argument("position_id", default=1)
-def view_applications_by_position_command(position_id):
-    pass
+def view_applications_by_position_command(staff_id, position_id):
+    application = view_applications_by_position(staff_id, position_id)
+    if application:
+        for app in application:
+            print(app)
 
 #List all shortlists
 @staff_cli.command("shortlists", help="Views all shortlists")
-def view_shortlists_command():
-    pass
+@click.argument("staff_id", default=1)
+def view_shortlists_command(staff_id):
+    shortlists = view_shortlists(staff_id)
+    if shortlists:
+        for shortlist in shortlists:
+            print(shortlist)
 
 #List all shortlists for a position
 @staff_cli.command("shortlists-by-position", help="Views all applications for a position")
+@click.argument("staff_id", default=1)
 @click.argument("position_id", default=1)
-def view_shortlists_by_position_command(position_id):
-    pass
+def view_shortlists_by_position_command(staff_id, position_id):
+    shortlists = view_shortlist_by_position(staff_id, position_id)
+    if shortlists:
+        for shortlist in shortlists:
+            print(shortlist)
 
 #Add an application to a shortlist
-@staff_cli.command("add_to_shortlist", help="Adds a student to a shortlist")
-@click.argument("student_id", default=1)
-@click.argument("position_id", default=1)
-def add_to_shortlist_command(student_id, position_id):
-    pass
+@staff_cli.command("shortlist-application", help="Adds a student to a shortlist")
+@click.argument("staff_id", default=1)
+@click.argument("application_id", default=1)
+def add_to_shortlist_command(staff_id, application_id):
+    application = add_application_to_shortlist(staff_id, application_id)
+    if isinstance(application, str):
+        print(application)
+    else:
+        print(f'Application ID {application_id} added to shortlist by Staff ID {staff_id}')
+    
 
 app.cli.add_command(staff_cli) # add the group to the cli
 
