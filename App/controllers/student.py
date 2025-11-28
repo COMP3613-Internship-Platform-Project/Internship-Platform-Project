@@ -13,23 +13,47 @@ def create_student(username: str, password: str, email: str, skills: list):
         db.session.rollback()
         raise Exception(f"Error creating student: {e}")
 
-def view_my_shortlist(student_id):
+def view_my_applications(student_id):
     try:
         student: Student | None = Student.query.get(student_id)
         if not student:
             return f"Student with ID {student_id} does not exist."
         
-        shortlists = Shortlist.query.filter_by(student_id=student.id).all()
+        applications = Application.query.filter_by(student_id=student.id).all()
         result = []
-        for shortlist in shortlists:
-            position = shortlist.position
+        for application in applications:
+            position = application.position
             employer = position.employer if position else None
-            application = Application.query.filter_by(student_id=student.id, position_id=position.id).first() if position else None
             result.append({
                 "employer_name": employer.username if employer else None,
                 "position_title": position.title if position else None,
-                "application_status": application.status if application else None,
-                "student_id": str(student.id),
+                "application_status": application.state_value,
+                "student_id": student.id,
+                "student_name": student.username,
+                "student_email": student.email,
+                "student_skills": student.skills if isinstance(student.skills, list) else []
+            })
+        return result
+    except SQLAlchemyError as e:
+        raise Exception(f"Error retrieving student's applications: {e}")
+
+def view_my_shortlisted_applications(student_id):
+    try:
+        student: Student | None = Student.query.get(student_id)
+        if not student:
+            return f"Student with ID {student_id} does not exist."
+        
+        #retrieve applications in shortlisted state
+        applications = Application.query.filter_by(student_id=student.id, state_value="Shortlisted").all()
+        result = []
+        for application in applications:
+            position = application.position
+            employer = position.employer if position else None
+            result.append({
+                "employer_name": employer.username if employer else None,
+                "position_title": position.title if position else None,
+                "application_status": application.state_value,
+                "student_id": student.id,
                 "student_name": student.username,
                 "student_email": student.email,
                 "student_skills": student.skills if isinstance(student.skills, list) else []
