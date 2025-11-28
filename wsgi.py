@@ -6,8 +6,8 @@ from App.models import User
 from App.main import create_app
 from App.controllers import ( create_user, get_all_users_json, get_all_users, initialize, open_position, get_positions_by_employer)
 from App.controllers.position import get_shortlist_by_position
-from App.controllers.student import get_shortlist_by_student
-from App.controllers.application import add_student_to_shortlist
+# from App.controllers.student import get_shortlist_by_student
+from App.controllers.application import add_application_to_shortlist
 
 
 # This commands file allow you to create convenient CLI commands for testing controllers
@@ -85,7 +85,7 @@ staff_cli = AppGroup('staff', help='Staff object commands')
 @click.argument("position_id", default=1)
 @click.argument("staff_id", default=1)
 def add_to_shortlist_command(student_id, position_id, staff_id):
-    test = add_student_to_shortlist(student_id, position_id, staff_id)
+    test = add_application_to_shortlist(student_id, position_id, staff_id)
     if test:
         print(f'Student {student_id} added to shortlist for position {position_id}')
         print("\n\n__________________________________________________________________________\n\n")
