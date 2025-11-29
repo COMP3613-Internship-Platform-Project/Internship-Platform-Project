@@ -1,3 +1,4 @@
+from flask import jsonify
 import os, tempfile, pytest, logging, unittest
 from werkzeug.security import check_password_hash, generate_password_hash
 
@@ -6,12 +7,22 @@ from App.database import db, create_db
 from App.models import User, Employer, Position, Shortlist, Staff, Student
 from App.controllers import (
     create_user,
+    get_all_users,
+    create_student,
+    create_staff,
+    create_employer,
     get_all_users_json,
     login,
-    get_user,
-    get_user_by_username,
-    update_user,
-    open_position
+    authenticate,
+    jwt_authenticate,
+    is_staff,
+    is_employer,
+    is_student,
+    logout,
+    list_students,
+    create_position, 
+    close_position, 
+    list_positions_by_employer
 )
 
 
@@ -63,6 +74,8 @@ class UserUnitTests(unittest.TestCase):
         employer = Employer("Microsoft", "microsoftpass", "microsoft@mail.com")
         assert employer.username == "Microsoft"
         assert employer.email == "microsoft@mail.com"
+
+    
        
 
    
@@ -70,30 +83,120 @@ class UserUnitTests(unittest.TestCase):
     Integration Tests
 '''
 
-# # This fixture creates an empty database for the test and deletes it after the test
-# # scope="class" would execute the fixture once and resued for all methods in the class
-# @pytest.fixture(autouse=True, scope="function")
-# def empty_db():
-#     app = create_app({'TESTING': True, 'SQLALCHEMY_DATABASE_URI': 'sqlite:///test.db'})
+# This fixture creates an empty database for the test and deletes it after the test
+# scope="class" would execute the fixture once and resued for all methods in the class
+@pytest.fixture(autouse=True, scope="function")
+def empty_db():
+    app = create_app({'TESTING': True, 'SQLALCHEMY_DATABASE_URI': 'sqlite:///test.db'})
     
-#     with app.app_context():
-#         create_db()
-#         yield app.test_client()
-#         db.drop_all()
+    with app.app_context():
+        create_db()
+        yield app.test_client()
+        db.drop_all()
 
 
-# class UserIntegrationTests(unittest.TestCase):
+class UserIntegrationTests(unittest.TestCase):
 
-#     def test_create_user(self):
+    def test_create_user(self):
+        user = create_user("bob", "bobpass", "bob@example.com")
+        users = get_all_users()
+        self.assertIn(user, users)
+
+    def test_create_student(self):
+        student = create_student("student", "studentpass","student@mail.com", ["Java", "C++"])
+        users = get_all_users()
+        self.assertIn(student, users)
+
+    def test_create_staff(self):
+        staff = create_staff("trudy", "trudypass","trudy@mail.com")
+        users = get_all_users()
+        self.assertIn(staff, users)
+
+    def test_create_employer(self):
+        employer = create_employer("Microsoft", "microsoftpass","microsoft@mail.com")
+        users = get_all_users()
+        self.assertIn(employer, users)
+
+    def test_get_all_users_json(self):
+        user = create_user("mimi", "mimipass","mimi@example.com")
+        users_json = get_all_users_json()
+        self.assertIn({"id": 1, 
+                       "username":"mimi", 
+                       "email":"mimi@example.com",} , users_json)
         
-#         staff = create_user("rick", "bobpass", "staff")
-#         assert staff.username == "rick" 
+    #authentication test
+    def test_login(self):
+        user = create_user("bob", "bobpass","bob@example.com")
+        assert login("bob", "bobpass") != None
 
-#         employer = create_user("sam", "sampass", "employer")
-#         assert employer.username == "sam"
+    def test_authenticate(self):
+        student = create_student("student", "studentpass", "student@mail.com", ["Java", "C++"])
+        staff = create_staff("trudy", "trudypass","trudy@mail.com")
+        employer = create_employer("Microsoft", "microsoftpass","microsoft@mail.com")
+        assert authenticate("student", "studentpass") == student
+        assert authenticate("trudy", "trudypass") == staff
+        assert authenticate("Microsoft", "microsoftpass") == employer
 
-#         student = create_user("hannah", "hannahpass", "student")
-#         assert student.username == "hannah"
+    def test_jwt_authenticate(self):
+        staff = create_staff("trudy", "trudypass","trudy@mail.com")
+        student = create_student("student", "studentpass","student@mail.com", ["Java", "C++"])
+        employer = create_employer("Microsoft", "microsoftpass","microsoft@mail.com")
+        assert jwt_authenticate("trudy", "trudypass") != None
+        assert jwt_authenticate("student", "studentpass") != None
+        assert jwt_authenticate("Microsoft", "microsoftpass") != None
+
+    def test_is_staff(self):
+        staff = create_staff("trudy", "trudypass","trudy@mail.com")
+        assert is_staff(staff.id) == True
+
+    def test_is_employer(self):
+        employer = create_employer("Microsoft", "microsoftpass","microsoft@mail.com")
+        assert is_employer(employer.id) == True
+
+    def test_is_student(self):
+        student = create_student("student", "studentpass","student@mail.com", ["Java", "C++"])
+        assert is_student(student.id) == True
+
+    def test_logout(self):
+        user = create_user("bob", "bobpass","bob@example.com")
+        response = login("bob", "bobpass")
+        response = jsonify({"msg": "logout successful"})
+        assert logout(response) != None
+
+    ### didnt test 
+
+    def test_list_students(self):
+        student = create_student("student", "studentpass","student@mail.com", ["Java", "C++"])
+        student = student.get_json()
+        staff = create_staff("trudy", "trudypass","trudy@mail.com")
+        students_list = list_students(staff.id)
+        self.assertIn(student, students_list)
+
+    def test_create_position(self):
+        employer = create_employer("Google", "googlepass","google@mail.com")
+        position = create_position(employer.id, "Software Intern", 5)
+        assert position != None
+        assert position.status == "Open"
+
+    def test_close_position(self):
+        employer = create_employer("Amazon", "amazonpass","amazon@mail.com")
+        position = create_position(employer.id, "Data Analyst Intern", 3)
+        close_position(position.id, employer.id)
+        assert position.status == "Closed"
+
+    def test_view_all_positions(self):
+        employer = create_employer("Facebook", "facebookpass","facebook@mail.com")
+        position1 = create_position(employer.id, "Web Developer Intern", 4)
+        position2 = create_position(employer.id, "App Developer Intern", 2)
+        positions = list_positions_by_employer(employer.id)
+        self.assertIn(position1.toJSON(), positions)
+        self.assertIn(position2.toJSON(), positions)
+
+
+    
+
+
+        
 
 #    # def test_get_all_users_json(self):
 #      #   users_json = get_all_users_json()

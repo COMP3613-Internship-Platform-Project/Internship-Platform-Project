@@ -1,6 +1,6 @@
-from flask_jwt_extended import create_access_token, jwt_required, JWTManager, get_jwt_identity, verify_jwt_in_request
+from flask_jwt_extended import create_access_token, jwt_required, JWTManager, get_jwt_identity, verify_jwt_in_request, unset_jwt_cookies
 
-from App.models import User
+from App.models import User, Staff, Employer, Student
 from App.database import db
 
 def login(username, password):
@@ -8,6 +8,58 @@ def login(username, password):
   if user and user.check_password(password):
     return create_access_token(identity=str(user.id))
   return None
+
+def authenticate(username, password): #Marishel : added authentication in auth controller 
+  staff = Staff.query.filter_by(username=username).first()
+  if staff and staff.check_password(password):
+    return staff
+  
+  employer = Employer.query.filter_by(username=username).first()
+  if employer and employer.check_password(password):
+    return employer
+  
+  student = Student.query.filter_by(username=username).first()
+  if student and student.check_password(password):
+    return student
+
+  return None
+
+def jwt_authenticate(username, password): #Marishel : added JWT authentication in auth controller
+  user = User.query.filter_by(username=username).one_or_none()
+  if user and user.check_password(password):
+    user_type = None
+
+    if Staff.query.filter_by(id=user.id).first():
+      user_type = 'staff'
+    elif Employer.query.filter_by(id=user.id).first():
+      user_type = 'employer'
+    elif Student.query.filter_by(id=user.id).first():
+      user_type = 'student'
+
+    return create_access_token(identity=str(user.id), additional_claims={'user_type': user_type, 'username': username})
+  return None
+
+def is_staff(identity): #Marishel : added role check functions in auth controller
+  user = User.query.filter_by(id=identity).first()
+  if user and Staff.query.filter_by(id=user.id).first():
+    return True
+  return False
+
+def is_employer(identity):
+  user = User.query.filter_by(id=identity).first()
+  if user and Employer.query.filter_by(id=user.id).first():
+    return True
+  return False
+
+def is_student(identity):
+  user = User.query.filter_by(id=identity).first()
+  if user and Student.query.filter_by(id=user.id).first():
+    return True
+  return False  
+
+def logout(response):
+    unset_jwt_cookies(response)
+    return response
 
 def setup_jwt(app):
   jwt = JWTManager(app)

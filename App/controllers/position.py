@@ -72,3 +72,19 @@ def reopen_position(position_id: int, employer_id: int): #Marishel
     else:
         position.reopen_position()
         return f"Position with ID {position_id} has been reopened." # not sure to return message or position object
+
+def list_positions_by_employer(employer_id: int): #Marishel : added view positions by employer function
+    try:
+        employer: Employer | None = db.session.get(Employer, employer_id)
+        if employer is None:
+            return f"Employer with ID {employer_id} does not exist"
+        
+        positions = Position.query.filter_by(employer_id=employer.id).all()
+        if not positions:
+            return f"No positions found for Employer with ID {employer_id}"
+        positions_data = []
+        for position in positions:
+            positions_data.append(position.toJSON())
+        return positions_data
+    except SQLAlchemyError as e:
+        return f"Error listing positions: {e}"
