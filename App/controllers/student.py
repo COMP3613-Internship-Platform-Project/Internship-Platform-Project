@@ -46,19 +46,22 @@ def view_my_shortlisted_applications(student_id):
         #retrieve applications in shortlisted state
         applications = Application.query.filter_by(student_id=student.id, state_value="Shortlisted").all()
         result = []
-        for application in applications:
-            position = application.position
-            employer = position.employer if position else None
-            result.append({
-                "employer_name": employer.username if employer else None,
-                "position_title": position.title if position else None,
-                "application_status": application.state_value,
-                "student_id": student.id,
-                "student_name": student.username,
-                "student_email": student.email,
-                "student_skills": student.skills if isinstance(student.skills, list) else []
-            })
-        return result
+        if applications:
+            for application in applications:
+                position = application.position
+                employer = position.employer if position else None
+                result.append({
+                    "employer_name": employer.username if employer else None,
+                    "position_title": position.title if position else None,
+                    "application_status": application.state_value,
+                    "student_id": student.id,
+                    "student_name": student.username,
+                    "student_email": student.email,
+                    "student_skills": student.skills if isinstance(student.skills, list) else []
+                })
+            return result
+        else:
+            return f"No shortlisted applications found for Student ID {student_id}."
     except SQLAlchemyError as e:
         raise Exception(f"Error retrieving student's shortlist: {e}")
     
