@@ -75,7 +75,7 @@ student_cli = AppGroup('student', help='Student object commands')
 
 #Commands go here
 
-@student_cli.command("create-application", help="Creates an application for a student to a position")
+@student_cli.command("apply", help="Creates an application for a student to a position")
 @click.argument("student_id", default=5)
 @click.argument("position_id", default=2)
 def create_application_command(student_id, position_id):
@@ -134,7 +134,7 @@ def list_positions_command(staff_id):
 
 #Create shortlist for a position
 @staff_cli.command("create-shortlist", help="Creates a shortlist for a position")
-@click.argument("position_id", default=1)
+@click.argument("position_id", default=3)
 def create_shortlist_command(position_id):
     shortlist = create_shortlist(position_id)
     if isinstance(shortlist, str):
