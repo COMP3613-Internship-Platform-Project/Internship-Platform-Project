@@ -50,18 +50,18 @@ def view_shortlisted_applications(employer_id):
         return jsonify({"error": "Employer not found"}), 404
 
     #check if the requester is trying to access their own shortlisted applications
-    if int(authenticated_employer_id) != int(employer_id):
+    if str(authenticated_employer_id) != str(employer_id):
         return jsonify({"error": "Access denied - can only view shortlisted applications for your own position"}), 401
     
     try:
-        result = get_shortlisted_applications_for_employer(int_employer_id)
+        result = get_shortlisted_applications_for_employer(int(employer_id))
         if result is None:
             return jsonify({"error": "No shortlisted applications found"}), 404
         return jsonify(result), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-@employer_views.route('/api/positions/<position_id>/accept/<student_id>', methods=['PUT'])
+@employer_views.route('/api/positions/<position_id>/accept/<student_id>', methods=['POST'])
 @jwt_required()
 def accept_student_endpoint(position_id, student_id):
     employer_id = get_jwt_identity()
@@ -80,11 +80,13 @@ def accept_student_endpoint(position_id, student_id):
     result = accept_student(int_employer_id, int_position_id, int_student_id)
 
     if isinstance(result, str):
-        if "accepted" in result.lower():
+        if "accepted" in result:
             return jsonify({"message": result}), 200
         return jsonify({"error": result}), 400
 
-@employer_views.route('/api/positions/<position_id>/reject/<student_id>', methods=['PUT'])
+    return jsonify({"message": f"Student ID {student_id} has been accepted"}), 200
+
+@employer_views.route('/api/positions/<position_id>/reject/<student_id>', methods=['POST'])
 @jwt_required()
 def reject_student_endpoint(position_id, student_id):
     employer_id = get_jwt_identity()
@@ -103,6 +105,8 @@ def reject_student_endpoint(position_id, student_id):
     result = reject_student(int_employer_id, int_position_id, int_student_id)
 
     if isinstance(result, str):
-        if "rejected" not in result.lower():
+        if "rejected" in result:
             return jsonify({"message": result}), 200
         return jsonify({"error": result}), 400
+
+    return jsonify({"message": f"Student ID {student_id} has been rejected"}), 200
