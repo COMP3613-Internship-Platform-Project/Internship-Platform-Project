@@ -23,7 +23,8 @@ class User(db.Model):#added inheritance and removed obsolete attributes
     def get_json(self):
         return{
             'id': self.id,
-            'username': self.username
+            'username': self.username,
+            'email': self.email
         }
 
     def set_password(self, password):
