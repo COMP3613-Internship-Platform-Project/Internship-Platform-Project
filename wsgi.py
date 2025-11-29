@@ -93,7 +93,7 @@ def get_applications_command(student_id):
         for app in applications:
             print(app)
 
-#we don't have any applications shortlisted yet, nor do we have a get_shorlist_by_student/application as yet
+#Lists a student's shortlisted applications
 @student_cli.command("get-shortlists", help="Gets all shortlists for a student")
 @click.argument("student_id", default=5)
 def get_shortlist_command(student_id):
@@ -125,6 +125,16 @@ def list_positions_command(staff_id):
     if positions:
         for position in positions:
             print(position)
+
+#Create shortlist for a position
+@staff_cli.command("create-shortlist", help="Creates a shortlist for a position")
+@click.argument("position_id", default=1)
+def create_shortlist_command(position_id):
+    shortlist = create_shortlist(position_id)
+    if isinstance(shortlist, str):
+        print(shortlist)
+    else:
+        print(f'Shortlist created for Position ID {position_id} with Shortlist ID {shortlist.id}')
 
     
 
