@@ -70,7 +70,7 @@ class RejectedState(State): #final state when application is rejected by employe
     def __init__(self):
         self.state_value = "Rejected"
 
-    def shortlist(self):
+    def shortlist_application(self):
         raise ValueError("Cannot shortlist an application that is Rejected.")
 
     def reject(self):
