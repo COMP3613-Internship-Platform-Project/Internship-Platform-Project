@@ -57,7 +57,7 @@ def add_application_to_shortlist(staff_id, application_id):
 
         # ensuring application transition strictly from applied to shortlisted state
         if application.state_value == "Applied":
-            application.shortlist_application() #there is no state here to change, so causing problems
+            application.shortlist_application()
         else:
             return f"Application with ID {application_id} cannot be shortlisted from state '{application.state_value}'."
 
