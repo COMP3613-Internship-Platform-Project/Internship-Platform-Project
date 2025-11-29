@@ -42,7 +42,7 @@ def create_student_command():
     username = click.prompt("Enter username")
     password = click.prompt("Enter password")
     email = click.prompt("Enter email")
-    skills = click.prompt("Enter skills (comma separated)").split(",")
+    skills = click.prompt("Enter skills (comma separated)").split(", ")
     student = create_student(username, password, email, skills)
     print(f'Student {student.username} created with ID: {student.id}')
 
@@ -75,7 +75,7 @@ student_cli = AppGroup('student', help='Student object commands')
 
 #Commands go here
 
-@student_cli.command("create-application", help="Creates an application for a student to a position")
+@student_cli.command("apply", help="Creates an application for a student to a position")
 @click.argument("student_id", default=5)
 @click.argument("position_id", default=2)
 def create_application_command(student_id, position_id):
@@ -89,18 +89,22 @@ def create_application_command(student_id, position_id):
 @click.argument("student_id", default=5)
 def get_applications_command(student_id):
     applications = get_applications_by_student(student_id)
-    if applications:
+    if isinstance(applications, list) and applications:
         for app in applications:
             print(app)
+    elif isinstance(applications, str):
+        print(applications)
 
 #Lists a student's shortlisted applications
 @student_cli.command("get-shortlists", help="Gets all shortlists for a student")
 @click.argument("student_id", default=5)
 def get_shortlist_command(student_id):
     shortlists = view_my_shortlisted_applications(student_id)
-    if shortlists:
+    if isinstance(shortlists, list) and shortlists:
         for app in shortlists:
             print(app)
+    elif isinstance(shortlists, str):
+        print(shortlists)
 
 @student_cli.command("reject-position", help="Student rejects a position they have accepted")
 @click.argument("student_id", default=5)
@@ -122,13 +126,15 @@ staff_cli = AppGroup('staff', help='Staff object commands')
 @click.argument("staff_id",default=1)
 def list_positions_command(staff_id):
     positions = view_positions(staff_id)
-    if positions:
+    if isinstance(positions, list) and positions:
         for position in positions:
             print(position)
+    elif isinstance(positions, str):
+        print(positions)
 
 #Create shortlist for a position
 @staff_cli.command("create-shortlist", help="Creates a shortlist for a position")
-@click.argument("position_id", default=1)
+@click.argument("position_id", default=3)
 def create_shortlist_command(position_id):
     shortlist = create_shortlist(position_id)
     if isinstance(shortlist, str):
@@ -143,9 +149,11 @@ def create_shortlist_command(position_id):
 @click.argument("staff_id", default=1)
 def list_students_command(staff_id):
     students = list_students(staff_id)
-    if students:
+    if isinstance(students, list) and students:
         for student in students:
             print(student)
+    elif isinstance(students, str):
+        print(students)
 
 
 #List all applications
@@ -153,9 +161,11 @@ def list_students_command(staff_id):
 @click.argument("staff_id", default=1)
 def view_applications_command(staff_id):
     applications = view_applications(staff_id)
-    if applications:
+    if isinstance(applications, list) and applications:
         for application in applications:
             print(application)
+    elif isinstance(applications, str):
+        print(applications)
 
 #List all applications for a position
 @staff_cli.command("applications-by-position", help="Views all applications for a position")
@@ -163,18 +173,22 @@ def view_applications_command(staff_id):
 @click.argument("position_id", default=1)
 def view_applications_by_position_command(staff_id, position_id):
     application = view_applications_by_position(staff_id, position_id)
-    if application:
+    if isinstance(application, list) and application:
         for app in application:
             print(app)
+    elif isinstance(application, str):
+        print(application)
 
 #List all shortlists
 @staff_cli.command("shortlists", help="Views all shortlists")
 @click.argument("staff_id", default=1)
 def view_shortlists_command(staff_id):
     shortlists = view_shortlists(staff_id)
-    if shortlists:
+    if isinstance(shortlists, list) and shortlists:
         for shortlist in shortlists:
             print(shortlist)
+    elif isinstance(shortlists, str):
+        print(shortlists)
 
 #List all shortlists for a position
 @staff_cli.command("shortlists-by-position", help="Views all applications for a position")
@@ -182,9 +196,11 @@ def view_shortlists_command(staff_id):
 @click.argument("position_id", default=1)
 def view_shortlists_by_position_command(staff_id, position_id):
     shortlists = view_shortlist_by_position(staff_id, position_id)
-    if shortlists:
+    if isinstance(shortlists, list) and shortlists:
         for shortlist in shortlists:
             print(shortlist)
+    elif isinstance(shortlists, str):
+        print(shortlists)
 
 #Add an application to a shortlist
 @staff_cli.command("shortlist-application", help="Adds a student to a shortlist")
@@ -211,9 +227,11 @@ employer_cli = AppGroup('employer', help='Employer object commands')
 @click.argument("employer_id", default=3)
 def view_employer_shortlists_command(employer_id):
     shortlists = get_shortlisted_applications_for_employer(employer_id)
-    if shortlists:
+    if isinstance(shortlists, list) and shortlists:
         for shortlist in shortlists:
             print(shortlist)
+    elif isinstance(shortlists, str):
+        print(shortlists)
 
 #Creates a new position
 @employer_cli.command("position", help="Creates a position")
