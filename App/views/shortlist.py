@@ -1,31 +1,29 @@
 from flask import Blueprint, jsonify, request
-from flask_jwt_extended import jwt_required, current_user
-# from App.controllers.position import get_shortlist_by_position
-# from App.controllers.student import get_shortlist_by_student
-from App.controllers.application import add_application_to_shortlist
+from flask_jwt_extended import jwt_required, get_jwt_identity
+from App.models import Position
+from App.controllers.shortlist import create_shortlist
 
 
 shortlist_views = Blueprint('shortlist_views', __name__, template_folder='../templates')
 
-@shortlist_views.route('/api/shortlist/student/<int:student_id>', methods = ['GET'])
+@shortlist_views.route('/api/shortlist', methods = ['POST'])
 @jwt_required()
-def get_student_shortlist(student_id):
-    
-    if current_user.role == 'student' and current_user.id != student_id:
-         return jsonify({"message": "Unauthorized user"}), 403
+def create_shortlist_route():
+    authenticated_staff_id = get_jwt_identity()
+    if not authenticated_staff_id:
+        return jsonify({"error": "Access Denied - Staff authorization required"}), 401
      
-     
-    shortlists = get_shortlist_by_student(student_id)
+    data = request.json
     
-    return jsonify([s.toJSON() for s in shortlists]), 200
-
-@shortlist_views.route('/api/shortlist/position/<int:position_id>', methods=['GET'])
-@jwt_required()
-def get_position_shortlist(position_id):
-    if current_user.role != 'employer' and current_user.role != 'staff':
-        return jsonify({"message": "Unauthorized user"}), 403
+    position_id = data['position_id']
+    poistion = Position.query.get(position_id)
+    if not poistion:
+        return jsonify({"error": f"Position with ID {position_id} does not exist"}), 400
     
-    
-    shortlists = get_shortlist_by_position(position_id)
-    return jsonify([s.toJSON() for s in shortlists]), 200 
-     
+    try:
+        new_shortlist = create_shortlist(position_id, authenticated_staff_id)
+        return jsonify({"message": "Shortlist Created", 
+                        "shortlist_id": f"{new_shortlist.id}"
+                        }), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
