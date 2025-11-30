@@ -126,6 +126,7 @@ def get_all_shortlists_by_employer(employer_id: int): #Marishel - added employer
                 shortlist_data = {
                     "shortlist_id": shortlist.id,
                     "position_title": position.title,
+                    "employer_username": employer.username,
                     "applications": []
                 }
                 applications = shortlist.applications

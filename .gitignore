@@ -1,18 +1,17 @@
 # Ignore Python bytecode
-__pycache__/*.pyc
-
-#Ignore all pycache
 *.pyc
-
+__pycache__/
+**/__pycache__/
 
 
 # Ignore test database
 instance/temp-database.db
 *.db
 
-# Ignore VS Code settings (optional)
-#.vscode/
 
 # Ignore environment files (optional)
 .env
 
+
+# Ignore VS Code settings (optional)
+#.vscode/

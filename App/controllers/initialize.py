@@ -28,8 +28,8 @@ def initialize():
         int(employer2.id), "Data Analyst", 3
     )
 
-    shortlist = create_shortlist(int(position.id)) # Marishel added this wihout staff ID
-    shortlist2 = create_shortlist(int(position2.id))
+    shortlist = create_shortlist(int(position.id), int(staff.id))
+    shortlist2 = create_shortlist(int(position2.id), int(staff2.id))
 
     application = create_application(int(student.id), int(position.id))
     application2 = create_application(int(student2.id), int(position2.id))
