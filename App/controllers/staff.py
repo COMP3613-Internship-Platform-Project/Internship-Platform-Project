@@ -22,7 +22,13 @@ def list_students(staff_id: int):
         students_data = []
 
         for student in students:
-            students_data.append(student.get_json())
+            students_data.append({
+                "id": student.id,
+                "username": student.username,
+                "email": student.email,
+                "skills": ", ".join(student.skills) if isinstance(student.skills, list) else str(student.skills),
+                "type": "student"
+            })
         return students_data
     except SQLAlchemyError as e:
         return f"Error listing students: {e}"
@@ -57,9 +63,9 @@ def view_shortlists(staff_id: int):
                         shortlists_data.append({
                             "application_id": application.id,
                             "application_status": application.state_value,
-                            "student_email": student.email if student else "N/A",
                             "student_id": student.id if student else None,
                             "student_name": student.username if student else "N/A",
+                            "student_email": student.email if student else "N/A",
                             "student_skills": student.skills if student else []
                         })
         return shortlists_data
@@ -96,9 +102,9 @@ def view_shortlist_by_position(staff_id: int, position_id: int):
                         shortlists_data.append({
                             "application_id": application.id,
                             "application_status": application.state_value,
-                            "student_email": student.email if student else "N/A",
                             "student_id": student.id if student else None,
                             "student_name": student.username if student else "N/A",
+                            "student_email": student.email if student else "N/A",
                             "student_skills": student.skills if student else []
                         })
         return shortlists_data
@@ -126,9 +132,9 @@ def view_applications(staff_id: int):
                 "employer_username": employer_name,
                 "position_title": position_title,
                 "application_state_value": application.state_value,
-                "student_email": student.email if student else "N/A",
                 "student_id": student.id if student else None,
                 "student_username": student.username if student else "N/A",
+                "student_email": student.email if student else "N/A",
                 "student_skills": student.skills if student else []
             })
         return applications_data
@@ -156,9 +162,9 @@ def view_applications_by_position(staff_id: int, position_id: int):
                 "employer_username": employer_name,
                 "position_title": position_title,
                 "application_status": application.state_value,
-                "student_email": student.email if student else "N/A",
                 "student_id": student.id if student else None,
                 "student_username": student.username if student else "N/A",
+                "student_email": student.email if student else "N/A",
                 "student_skills": student.skills if student else []
             })
         return applications_data
@@ -175,9 +181,14 @@ def view_positions(staff_id: int):
         positions_data = []
 
         for position in positions:
-            position_json = position.toJSON()
-            position_json["company_name"] = position.employer.username if position.employer else "N/A"
-            positions_data.append(position_json)
+            positions_data.append({
+                "id": position.id,
+                "title": position.title,
+                "number_of_positions": position.number_of_positions,
+                "status": position.status if hasattr(position, "status") else "N/A",
+                "employer_id": position.employer_id,
+                "company_name": position.employer.username if position.employer else "N/A"
+            })
         return positions_data
     except SQLAlchemyError as e:
         return f"Error viewing positions: {e}"
