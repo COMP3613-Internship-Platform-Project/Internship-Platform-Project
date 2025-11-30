@@ -166,11 +166,17 @@ class UserIntegrationTests(unittest.TestCase):
     ### didnt test 
 
     def test_list_students(self):
-        student = create_student("student", "studentpass","student@mail.com", ["Java", "C++"])
-        student = student.get_json()
-        staff = create_staff("trudy", "trudypass","trudy@mail.com")
+        student = create_student("student", "studentpass", "student@mail.com", ["Java", "C++"])
+        staff = create_staff("trudy", "trudypass", "trudy@mail.com")
         students_list = list_students(staff.id)
-        self.assertIn(student, students_list)
+        expected_student = {
+            "id": student.id,
+            "username": "student",
+            "email": "student@mail.com",
+            "skills": "Java, C++",
+            "type": "student"
+        }
+        self.assertIn(expected_student, students_list)
 
     def test_create_position(self):
         employer = create_employer("Google", "googlepass","google@mail.com")
