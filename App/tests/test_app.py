@@ -28,7 +28,13 @@ from App.controllers import (
     add_application_to_shortlist, 
     create_application,
     get_all_shortlists,
-    get_shortlist_by_position
+    get_shortlist_by_position_staff, 
+    get_all_applications, 
+    get_applications_by_position, 
+    get_applications_by_student,
+    get_application_by_student_and_position,
+    get_shortlist_by_position_employer, 
+    get_all_shortlists_by_employer
 )
 
 
@@ -202,6 +208,123 @@ class UserIntegrationTests(unittest.TestCase):
         self.assertIn(position1.toJSON(), positions)
         self.assertIn(position2.toJSON(), positions)
 
+
+    # tests for Application functionalities can be added here
+
+    def test_create_application(self):
+        employer = create_employer("Airbnb", "airbnbpass","airbnb@mail.com")
+        position = create_position(employer.id, "Hospitality Intern", 4)
+        student = create_student("alice", "alicepass","alice@mail.com", ["JavaScript", "React"])
+        application = create_application(student.id, position.id)
+        assert application != None
+
+    def test_view_all_applications(self):
+        employer = create_employer("Tesla", "teslapass","tesla@mail.com")
+        staff = create_staff("trudy", "trudypass","trudy@mail.com")
+        position = create_position(employer.id, "Engineering Intern", 3)
+        student1 = create_student("bob", "bobpass","bob@mail.com", ["Python", "Django"])
+        student2 = create_student("carol", "carolpass","carol@mail.com", ["Java", "Spring"])
+        application1 = create_application(student1.id, position.id)
+        application2 = create_application(student2.id, position.id)
+        applications = get_all_applications(staff.id)
+        expected_application1 = {
+            "application_id": application1.id,
+            "employer_name": employer.username,
+            "position_title": position.title,
+            "application_status": application1.state_value,
+            "student_email": student1.email,
+            "student_id": student1.id,
+            "student_username": student1.username,
+        }
+        expected_application2 = {
+            "application_id": application2.id,
+            "employer_name": employer.username,
+            "position_title": position.title,
+            "application_status": application2.state_value,
+            "student_email": student2.email,
+            "student_id": student2.id,
+            "student_username": student2.username,
+        }
+        self.assertIn(expected_application1, applications)
+        self.assertIn(expected_application2, applications)
+
+    def test_get_applications_by_position(self):
+        employer = create_employer("LinkedIn", "linkedinpass","linkedin@mail.com")
+        position = create_position(employer.id, "Marketing Intern", 2)
+        position2 = create_position(employer.id, "Sales Intern", 2)
+        staff = create_staff("trudy", "trudypass","trudy@mail.com")
+        student = create_student("dave", "davepass","dave@mail.com", ["Marketing", "SEO"])
+        application = create_application(student.id, position.id)
+        application2 = create_application(student.id, position2.id) # application for second position
+        applications = get_applications_by_position(staff.id, position.id) #shows only applications for first position
+        expected_application = {
+            "application_id": application.id,
+            "employer_name": employer.username,
+            "position_title": position.title,
+            "application_status": application.state_value,
+            "student_email": student.email,
+            "student_id": student.id,
+            "student_username": student.username,
+        }
+        expected_application2 = {
+            "application_id": application2.id,
+            "employer_name": employer.username,
+            "position_title": position2.title,
+            "application_status": application2.state_value,
+            "student_email": student.email,
+            "student_id": student.id,
+            "student_username": student.username,
+        }
+        self.assertIn(expected_application, applications)
+        self.assertNotIn(expected_application2, applications)
+
+
+    def test_get_applications_by_student(self):
+        employer = create_employer("Adobe", "adobepass","adobe@mail.com")
+        position = create_position(employer.id, "Design Intern", 2)
+        student = create_student("eva", "evapass","eva@mail.com", ["Design", "Photoshop"])
+        student2 = create_student("frank", "frankpass","frank@mail.com", ["Design", "Illustrator"])
+        application = create_application(student.id, position.id)
+        application2 = create_application(student2.id, position.id) # application for second student
+        applications = get_applications_by_student(student.id) #shows only applications for first student
+        expected_application = {
+            "employer_name": employer.username,
+                    "position_title": position.title,
+                    "application_status": application.state_value,
+                    "studnet_email": student.email,
+                    "student_id": student.id,
+                    "student_username": student.username,
+                    "student_skills": student.skills,
+        }
+        expected_application2 = {
+            "employer_name": employer.username,
+                    "position_title": position.title,
+                    "application_status": application2.state_value,
+                    "studnet_email": student2.email,
+                    "student_id": student2.id,
+                    "student_username": student2.username,
+                    "student_skills": student2.skills,
+        }
+        self.assertIn(expected_application, applications)
+        self.assertNotIn(expected_application2, applications) # second student application should not be in the first student's application list
+
+    def test_get_application_by_student_and_position(self):
+        employer = create_employer("Intel", "intelpass","intel@mail.com")
+        position = create_position(employer.id, "Hardware Intern", 2)
+        student = create_student("gina", "ginapass","gina@mail.com", ["C", "C++"])
+        application = create_application(student.id, position.id)
+        retrieved_application = get_application_by_student_and_position(student.id, position.id)
+        expected_application = {
+            "application_id": application.id,
+            "employer_name": employer.username,
+            "position_title": position.title,
+            "application_status": application.state_value,
+            "student_email": student.email,
+            "student_id": student.id,
+            "student_username": student.username,
+        }
+        self.assertDictEqual(expected_application, retrieved_application)
+
     #Marishel - Just added tests for shortlist functionalities
 
     def test_create_shortlist(self):
@@ -222,19 +345,52 @@ class UserIntegrationTests(unittest.TestCase):
         assert added_shortlist != None
 
 
-    def test_get_shortlist_by_position(self):
+    def test_get_shortlist_by_position_staff(self):
         employer = create_employer("Google", "googlepass","google@mail.com")
         position = create_position(employer.id, "Software Intern", 5)
         staff = create_staff("trudy", "trudypass","trudy@mail.com")
         shortlist = create_shortlist(position.id, staff.id)
-        shortlist_data = get_shortlist_by_position(position.id, staff.id)
+        shortlist_data = get_shortlist_by_position_staff(position.id, staff.id)
         self.assertDictEqual(shortlist_data, {
         "shortlist_id": shortlist.id,
         "position_title": position.title,
         "employer_username": employer.username,
         "applications": "No applications in this shortlist."
     })
-
+        
+    def test_get_shortlist_by_position_employer(self):
+        employer = create_employer("Google", "googlepass","google@mail.com")
+        position = create_position(employer.id, "Software Intern", 5)
+        staff = create_staff("trudy", "trudypass","trudy@mail.com")
+        shortlist = create_shortlist(position.id, staff.id)
+        shortlist_data = get_shortlist_by_position_employer(position.id, employer.id)
+        self.assertDictEqual(shortlist_data, {
+        "shortlist_id": shortlist.id,
+        "position_title": position.title,
+        "employer_username": employer.username,
+        "applications": "No applications in this shortlist."
+    })
+                                    
+    
+    def test_get_all_shortlists_by_employer(self):
+        employer = create_employer("Netflix", "netflixpass","netflix@mail.com")
+        position = create_position(employer.id, "Content Intern", 2)
+        position2 = create_position(employer.id, "Data Intern", 2)
+        staff = create_staff("trudy", "trudypass","trudy@mail.com")
+        shortlist = create_shortlist(position.id, staff.id)
+        shortlist2 = create_shortlist(position2.id, staff.id)
+        shortlists = get_all_shortlists_by_employer(employer.id)
+        self.assertListEqual(shortlists, [{
+            "shortlist_id": shortlist.id,
+            "position_title": position.title,
+            "employer_username": employer.username,
+            "applications": "No applications in this shortlist."
+        }, {
+            "shortlist_id": shortlist2.id,
+            "position_title": position2.title,
+            "employer_username": employer.username,
+            "applications": "No applications in this shortlist."
+        }])
 
 
     def test_view_all_shortlists(self):
@@ -249,6 +405,12 @@ class UserIntegrationTests(unittest.TestCase):
             "employer_username": employer.username,
             "applications": "No applications in this shortlist."
         }])
+
+    
+
+
+
+
     
 
 
