@@ -3,13 +3,35 @@ from flask.cli import with_appcontext, AppGroup
 
 from App.database import db, get_migrate
 from App.main import create_app
-from App.controllers.__init__ import *
-# from App.controllers.initialize import  initialize
-# from App.controllers.position import get_shortlist_by_position, create_position
-# from App.controllers.student import  create_student, student_reject_position
-# from App.controllers.employer import create_employer, get_shortlisted_applications_for_employer, accept_student, reject_student
-# from App.controllers.staff import create_staff, view_positions, list_students, view_shortlists, view_shortlist_by_position, view_applications, view_applications_by_position
-# from App.controllers.application import get_applications_by_student, create_application,add_application_to_shortlist
+from App.controllers.initialize import initialize
+from App.controllers.user import get_all_users, get_all_users_json
+from App.controllers.student import (
+    create_student,
+    view_my_shortlisted_applications,
+    student_reject_position,
+)
+from App.controllers.staff import (
+    create_staff,
+    view_positions,
+    list_students,
+    view_shortlists,
+    view_shortlist_by_position,
+    view_applications,
+    view_applications_by_position,
+)
+from App.controllers.application import (
+    create_application,
+    get_applications_by_student,
+    add_application_to_shortlist,
+)
+from App.controllers.shortlist import create_shortlist
+from App.controllers.employer import (
+    create_employer,
+    get_shortlisted_applications_for_employer,
+    accept_student,
+    reject_student,
+)
+from App.controllers.position import create_position
 
 
 # This commands file allow you to create convenient CLI commands for testing controllers
