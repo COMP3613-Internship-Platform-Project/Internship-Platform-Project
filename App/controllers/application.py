@@ -67,6 +67,31 @@ def add_application_to_shortlist(staff_id, application_id):
         db.session.rollback()
         raise Exception(f"Error adding application to shortlist: {e}")
     
+def get_all_applications(staff_id:int): #Marishel - added function to get all applications checking to ensure user is staff
+    try:
+        staff = db.session.query(Staff).filter_by(id=staff_id).first()
+        if not staff:
+            return f"Only staff members can access applications. Staff with ID {staff_id} does not exist."
+        
+        applications = db.session.query(Application).all()
+        applications_data = []
+        for application in applications:
+            student = db.session.query(Student).filter_by(id=application.student_id).first()
+            position = db.session.query(Position).filter_by(id=application.position_id).first()
+            employer = db.session.query(Employer).filter_by(id=position.employer_id).first()
+            applications_data.append({
+                "application_id": application.id,
+                "employer_name": employer.username,
+                "position_title": position.title,
+                "application_status": application.state_value,
+                "student_email": student.email,
+                "student_id": student.id,
+                "student_username": student.username,
+            })
+        return applications_data
+    except SQLAlchemyError as e:
+        raise Exception(f"Error retrieving applications: {e}")
+    
     
 def get_applications_by_student(student_id: int): #Marishel - added function to get applications by student ID
     try:
@@ -102,15 +127,23 @@ def get_application_by_student_and_position(student_id:int, position_id:int): #M
         if not position:
             return f"Position with ID {position_id} does not exist."
         
-        application = db.session.query(Application).filter_by(student_id=student_id, position_id=position_id).first()
-        if application:
-            return application.toJSON() #did to json for now 
+        application = db.session.query(Application).filter_by(student_id=student_id, position_id=position_id).first() 
+        if application: #Marishel : refactored return 
+            return {
+                "application_id": application.id,
+                "employer_name": db.session.query(Employer).filter_by(id=position.employer_id).first().username,
+                "position_title": position.title,
+                "application_status": application.state_value,
+                "student_email": student.email,
+                "student_id": student.id,
+                "student_username": student.username,
+            }
         else:
             return f"No application found for Student ID {student_id} and Position ID {position_id}."
     except SQLAlchemyError as e:
         raise Exception(f"Error retrieving application: {e}")
     
-def get_applications_by_position_staff(staff_id:int, position_id:int): # Marishel - added function to get applications by position ID and checking to ensure user is staff
+def get_applications_by_position(staff_id:int, position_id:int): # Marishel - added function to get applications by position ID and checking to ensure user is staff
     try:
         staff = db.session.query(Staff).filter_by(id=staff_id).first()
         if not staff:
