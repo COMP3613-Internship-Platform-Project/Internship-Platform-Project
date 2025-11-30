@@ -2,6 +2,7 @@ from flask import jsonify
 import os, tempfile, pytest, logging, unittest
 from werkzeug.security import check_password_hash, generate_password_hash
 
+from App.controllers.application import create_application
 from App.main import create_app
 from App.database import db, create_db
 from App.models import User, Employer, Position, Shortlist, Staff, Student
@@ -22,7 +23,12 @@ from App.controllers import (
     list_students,
     create_position, 
     close_position, 
-    list_positions_by_employer
+    list_positions_by_employer, 
+    create_shortlist,
+    add_application_to_shortlist, 
+    create_application,
+    get_all_shortlists,
+    get_shortlist_by_position
 )
 
 
@@ -163,8 +169,6 @@ class UserIntegrationTests(unittest.TestCase):
         response = jsonify({"msg": "logout successful"})
         assert logout(response) != None
 
-    ### didnt test 
-
     def test_list_students(self):
         student = create_student("student", "studentpass", "student@mail.com", ["Java", "C++"])
         staff = create_staff("trudy", "trudypass", "trudy@mail.com")
@@ -198,7 +202,53 @@ class UserIntegrationTests(unittest.TestCase):
         self.assertIn(position1.toJSON(), positions)
         self.assertIn(position2.toJSON(), positions)
 
+    #Marishel - Just added tests for shortlist functionalities
 
+    def test_create_shortlist(self):
+        employer = create_employer("Netflix", "netflixpass","netflix@mail.com")
+        position = create_position(employer.id, "Content Intern", 2)
+        staff = create_staff("trudy", "trudypass","trudy@mail.com")
+        shortlist = create_shortlist(position.id, staff.id)
+        assert shortlist != None
+
+    def test_add_application_to_shortlist(self):
+        employer = create_employer("Uber", "uberpass","uber@mail.com")
+        position = create_position(employer.id, "Logistics Intern", 3)
+        staff = create_staff("trudy", "trudypass","trudy@mail.com")
+        student = create_student("john", "johnpass","john@mail.com", ["HTML", "CSS"])
+        application = create_application(student.id, position.id)
+        shortlist = create_shortlist(position.id, staff.id)
+        added_shortlist = add_application_to_shortlist(application.id, shortlist.id)
+        assert added_shortlist != None
+
+
+    def test_get_shortlist_by_position(self):
+        employer = create_employer("Google", "googlepass","google@mail.com")
+        position = create_position(employer.id, "Software Intern", 5)
+        staff = create_staff("trudy", "trudypass","trudy@mail.com")
+        shortlist = create_shortlist(position.id, staff.id)
+        shortlist_data = get_shortlist_by_position(position.id, staff.id)
+        self.assertDictEqual(shortlist_data, {
+        "shortlist_id": shortlist.id,
+        "position_title": position.title,
+        "employer_username": employer.username,
+        "applications": "No applications in this shortlist."
+    })
+
+
+
+    def test_view_all_shortlists(self):
+        employer = create_employer("Spotify", "spotifypass","spotify@mail.com")
+        position = create_position(employer.id, "Music Intern", 3)
+        staff = create_staff("trudy", "trudypass","trudy@mail.com")
+        shortlist = create_shortlist(position.id, staff.id)
+        shortlists = get_all_shortlists(staff.id)
+        self.assertListEqual(shortlists, [{
+            "shortlist_id": shortlist.id,
+            "position_title": position.title,
+            "employer_username": employer.username,
+            "applications": "No applications in this shortlist."
+        }])
     
 
 
