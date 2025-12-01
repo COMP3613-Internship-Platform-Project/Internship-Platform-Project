@@ -37,7 +37,7 @@ def get_all_shortlists(staff_id: int): #Marishel - added staff id as staff are t
     try:
         staff = db.session.query(Staff).filter_by(id=staff_id).first()
         if not staff:
-            return f"Staff with ID {staff_id} does not exist."
+            return f"Only staff members can access shortlists. Staff with ID {staff_id} does not exist."
 
         shortlists = db.session.query(Shortlist).all()
         all_shortlists = []
