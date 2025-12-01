@@ -1,5 +1,5 @@
 from App.database import db
-from App.models import Staff, Student, Shortlist, Position, Application
+from App.models import Staff, Student, Shortlist, Position, Application, Employer
 from sqlalchemy.exc import SQLAlchemyError
 
 def create_staff(username: str, password: str, email: str):
@@ -32,84 +32,89 @@ def list_students(staff_id: int):
         return students_data
     except SQLAlchemyError as e:
         return f"Error listing students: {e}"
-    
-def view_shortlists(staff_id: int):
+
+def get_all_shortlists(staff_id: int): #Marishel - added staff id as staff are the only ones who would view all shortlists
     try:
-        staff = Staff.query.get(staff_id)
+        staff = db.session.query(Staff).filter_by(id=staff_id).first()
         if not staff:
-            return None
-        
-        shortlists = Shortlist.query.all()
-        shortlists_data = []
+            return f"Staff with ID {staff_id} does not exist."
 
+        shortlists = db.session.query(Shortlist).all()
+        all_shortlists = []
         for shortlist in shortlists:
-            position = Position.query.get(shortlist.position_id)
-            applications = Application.query.filter_by(position_id=position.id).all()
+            applications = shortlist.applications
+            position = db.session.query(Position).filter_by(id=shortlist.position_id).first()
+            employer = db.session.query(Employer).filter_by(id=position.employer_id).first()
+            shortlist_data = {
+                    "shortlist_id": shortlist.id,
+                    "position_id": position.id,
+                    "position_title": position.title,
+                    "employer_username": employer.username,
+                    "applications": []
+            }
+            applications = shortlist.applications
+            if applications:
+                for application in shortlist.applications:
+                    student = db.session.query(Student).filter_by(id=application.student_id).first()
+                    shortlist_data["applications"].append({
+                        "application_id": application.id,
+                        "application_status": application.state_value,
+                        "student_id": student.id,
+                        "student_username": student.username,
+                        "student_email": student.email,
+                        "student_skills": student.skills
+                    })
 
-            employer_name = position.employer.username if position and position.employer else "N/A"
-            position_title = position.title if position else "N/A"
+                all_shortlists.append(shortlist_data)
+            if not applications:
+                shortlist_data["applications"] = "No applications in this shortlist." #Marishel - added message for no applications in shortlist
+                all_shortlists.append(shortlist_data)          
+        return all_shortlists     
+    except SQLAlchemyError as e:
+        raise Exception(f"Error retrieving shortlists: {e}")
 
-            shortlists_data.append({
-                "shortlist_id": shortlist.id,
-                "employer_username": employer_name,
-                "position_id": position.id,
-                "position_title": position_title,
+def get_shortlist_by_position_staff(position_id: int, staff_id: int): #Marishel - added staff id as only staff would view shortlists
+    try:
+        staff = db.session.query(Staff).filter_by(id=staff_id).first()
+        if not staff:
+            return {"error": f"Cannot retrieve shortlist. Staff with ID {staff_id} does not exist."}
+
+        position = db.session.query(Position).filter_by(id=position_id).first()
+        if not position:
+            return {"error": f"Position with ID {position_id} does not exist."}
+
+        shortlist = db.session.query(Shortlist).filter_by(position_id=position_id).first()
+        if not shortlist:
+            return {"error": f"Shortlist for Position ID {position_id} does not exist."}
+
+        shortlist_data = {
+            "shortlist_id": shortlist.id,
+            "position_id": position.id,
+            "position_title": position.title,
+            "employer_username": position.employer.username,
+            "applications": []
+        }
+
+        if not shortlist.applications:
+            shortlist_data["applications"] = "No applications in this shortlist."
+            return shortlist_data
+
+        for application in shortlist.applications:
+            student = db.session.query(Student).filter_by(id=application.student_id).first()
+            shortlist_data["applications"].append({
+                "application_id": application.id,
+                "employer_id": position.employer_id,
+                "application_status": application.state_value,
+                "student_email": student.email,
+                "student_id": student.id,
+                "student_username": student.username,
+                "student_skills": student.skills
             })
 
-            if applications:
-                for application in applications:
-                    if application.state_value != "Applied":
-                        student = Student.query.get(application.student_id)
-                        shortlists_data.append({
-                            "application_id": application.id,
-                            "application_status": application.state_value,
-                            "student_id": student.id if student else None,
-                            "student_name": student.username if student else "N/A",
-                            "student_email": student.email if student else "N/A",
-                            "student_skills": student.skills if student else []
-                        })
-        return shortlists_data
+        return shortlist_data
+
     except SQLAlchemyError as e:
-        return f"Error viewing shortlists: {e}"
-
-def view_shortlist_by_position(staff_id: int, position_id: int):
-    try:
-        staff = Staff.query.get(staff_id)
-        if not staff:
-            return None
-        
-        shortlists = Shortlist.query.filter_by(position_id=position_id).all()
-        shortlists_data = []
-
-        for shortlist in shortlists:
-            position = Position.query.get(shortlist.position_id)
-            applications = Application.query.filter_by(position_id=position.id).all()
-
-            employer_name = position.employer.username if position and position.employer else "N/A"
-            position_title = f"{position.title} ({position.id})" if position else "N/A"
-
-            shortlists_data.append({
-                "shortlist_id": shortlist.id,
-                "employer_username": employer_name,
-                "position_id": position.id,
-                "position_title": position_title,
-            })
-
-            if applications:
-                for application in applications:
-                    if application.state_value != "Applied":
-                        student = Student.query.get(application.student_id)
-                        shortlists_data.append({
-                            "application_id": application.id,
-                            "application_status": application.state_value,
-                            "student_id": student.id if student else None,
-                            "student_name": student.username if student else "N/A",
-                            "student_email": student.email if student else "N/A",
-                            "student_skills": student.skills if student else []
-                        })
-        return shortlists_data
-    except SQLAlchemyError as e:
-        return f"Error viewing shortlist by position: {e}"
+        raise Exception(f"Error retrieving shortlists: {e}")
 
 def view_applications(staff_id: int):
     try:

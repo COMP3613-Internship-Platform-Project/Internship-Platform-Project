@@ -1,29 +1,5 @@
-from App.models import User, Student, Employer, Staff
+from App.models import User
 from App.database import db
-
-# def create_user(username, password, user_type):
-#     try:
-#         newuser = User(username=username, password=password, role=user_type)
-#         db.session.add(newuser)
-#         db.session.flush() 
-        
-#         if user_type == "student":
-#             student = Student(username=username, user_id=newuser.id)
-#             db.session.add(student)
-#         elif user_type == "employer":
-#             employer = Employer(username=username, user_id=newuser.id)
-#             db.session.add(employer)
-#         elif user_type == "staff":
-#             staff = Staff(username=username, user_id=newuser.id)
-#             db.session.add(staff)
-#         else:
-#             return False
-        
-#         db.session.commit()
-#         return newuser
-#     except Exception as e:
-#         db.session.rollback()
-#         return False
 
 def create_user(username, password, email): #Marishel : added this create user instead 
     newuser = User(username=username, password=password, email=email)

@@ -5,7 +5,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from App.controllers.application import create_application
 from App.main import create_app
 from App.database import db, create_db
-from App.models import User, Employer, Position, Shortlist, Staff, Student
+from App.models import User, Employer, Staff, Student
 from App.controllers import (
     create_user,
     get_all_users,
@@ -353,6 +353,7 @@ class UserIntegrationTests(unittest.TestCase):
         shortlist_data = get_shortlist_by_position_staff(position.id, staff.id)
         self.assertDictEqual(shortlist_data, {
         "shortlist_id": shortlist.id,
+        "position_id": position.id,
         "position_title": position.title,
         "employer_username": employer.username,
         "applications": "No applications in this shortlist."
@@ -366,6 +367,7 @@ class UserIntegrationTests(unittest.TestCase):
         shortlist_data = get_shortlist_by_position_employer(position.id, employer.id)
         self.assertDictEqual(shortlist_data, {
         "shortlist_id": shortlist.id,
+        "position_id": position.id,
         "position_title": position.title,
         "employer_username": employer.username,
         "applications": "No applications in this shortlist."
@@ -382,11 +384,13 @@ class UserIntegrationTests(unittest.TestCase):
         shortlists = get_all_shortlists_by_employer(employer.id)
         self.assertListEqual(shortlists, [{
             "shortlist_id": shortlist.id,
+            "position_id": position.id,
             "position_title": position.title,
             "employer_username": employer.username,
             "applications": "No applications in this shortlist."
         }, {
             "shortlist_id": shortlist2.id,
+            "position_id": position2.id,
             "position_title": position2.title,
             "employer_username": employer.username,
             "applications": "No applications in this shortlist."
@@ -401,104 +405,8 @@ class UserIntegrationTests(unittest.TestCase):
         shortlists = get_all_shortlists(staff.id)
         self.assertListEqual(shortlists, [{
             "shortlist_id": shortlist.id,
+            "position_id": position.id,
             "position_title": position.title,
             "employer_username": employer.username,
             "applications": "No applications in this shortlist."
         }])
-
-    
-
-
-
-
-    
-
-
-        
-
-#    # def test_get_all_users_json(self):
-#      #   users_json = get_all_users_json()
-#       #  self.assertListEqual([{"id":1, "username":"bob"}, {"id":2, "username":"rick"}], users_json)
-
-#     # Tests data changes in the database
-#     #def test_update_user(self):
-#       #  update_user(1, "ronnie")
-#       #  user = get_user(1)
-#        # assert user.username == "ronnie"
-        
-#     def test_open_position(self):
-#         position_count = 2
-#         employer = create_user("sally", "sallypass", "employer")
-#         assert employer is not None
-#         position = open_position("IT Support", employer.id, position_count)
-#         positions = get_positions_by_employer(employer.id)
-#         assert position is not None
-#         assert position.number_of_positions == position_count
-#         assert len(positions) > 0
-#         assert any(p.id == position.id for p in positions)
-        
-#         invalid_position = open_position("Developer",-1,1)
-#         assert invalid_position is False
-
-
-#     def test_add_to_shortlist(self):
-#         position_count = 3
-#         staff = create_user("linda", "lindapass", "staff")
-#         assert staff is not None
-#         student = create_user("hank", "hankpass", "student")
-#         assert student is not None
-#         employer =  create_user("ken", "kenpass", "employer")
-#         assert employer is not None
-#         position = open_position("Database Manager", employer.id, position_count)
-#         invalid_position = open_position("Developer",-1,1)
-#         assert invalid_position is False
-#         added_shortlist = add_student_to_shortlist(student.id, position.id ,staff.id)
-#         assert position is not None
-#         assert (added_shortlist)
-#         shortlists = get_shortlist_by_student(student.id)
-#         assert any(s.id == added_shortlist.id for s in shortlists)
-
-
-#     def test_decide_shortlist(self):
-#         position_count = 3
-#         student = create_user("jack", "jackpass", "student")
-#         assert student is not None
-#         staff = create_user ("pat", "patpass", "staff")
-#         assert staff is not None
-#         employer =  create_user("frank", "pass", "employer")
-#         assert employer is not None
-#         position = open_position("Intern", employer.id, position_count)
-#         assert position is not None
-#         stud_shortlist = add_student_to_shortlist(student.id, position.id ,staff.id)
-#         assert (stud_shortlist)
-#         decided_shortlist = decide_shortlist(student.id, position.id, "accepted")
-#         assert (decided_shortlist)
-#         shortlists = get_shortlist_by_student(student.id)
-#         assert any(s.status == PositionStatus.accepted for s in shortlists)
-#         assert position.number_of_positions == (position_count-1)
-#         assert len(shortlists) > 0
-#         invalid_decision = decide_shortlist(-1, -1, "accepted")
-#         assert invalid_decision is False
-
-
-#     def test_student_view_shortlist(self):
-
-#         student = create_user("john", "johnpass", "student")
-#         assert student is not None
-#         staff = create_user ("tim", "timpass", "staff")
-#         assert staff is not None
-#         employer =  create_user("joe", "joepass", "employer")
-#         assert employer is not None
-#         position = open_position("Software Intern", employer.id, 4)
-#         assert position is not None
-#         shortlist = add_student_to_shortlist(student.id, position.id ,staff.id)
-#         shortlists = get_shortlist_by_student(student.id)
-#         assert any(shortlist.id == s.id for s in shortlists)
-#         assert len(shortlists) > 0
-
-#     # Tests data changes in the database
-#     #def test_update_user(self):
-#     #    update_user(1, "ronnie")
-#     #   user = get_user(1)
-#     #   assert user.username == "ronnie"
-

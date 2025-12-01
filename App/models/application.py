@@ -2,8 +2,6 @@ from App.database import db
 from App.models.application_states import AppliedState, ShortlistedState, RejectedState, AcceptedState
 from sqlalchemy.orm import reconstructor
 
-#Converted this class to the Application Class
-
 class Application(db.Model):
     __tablename__ = 'application'
     id=db.Column(db.Integer, primary_key=True)

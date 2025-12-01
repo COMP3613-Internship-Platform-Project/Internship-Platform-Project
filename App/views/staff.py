@@ -6,8 +6,8 @@ from App.controllers import (
     is_staff,
     create_staff,
     list_students,
-    view_shortlists,
-    view_shortlist_by_position,
+    get_all_shortlists,
+    get_shortlist_by_position_staff,
     view_applications,
     view_applications_by_position,
     view_positions
@@ -80,7 +80,7 @@ def get_shortlists(staff_id):
         return jsonify({"error": "Staff not found"}), 404
 
     try:
-        shortlists = view_shortlists(int_staff_id)
+        shortlists = get_all_shortlists(int_staff_id)
         if shortlists is None:
             return jsonify({"error": "No shortlists found"}), 404
         return jsonify(shortlists), 200
@@ -109,7 +109,7 @@ def get_shortlist_by_position(staff_id, position_id):
         return jsonify({"error": "Staff not found"}), 404
 
     try:
-        shortlists = view_shortlist_by_position(int_staff_id, int_position_id)
+        shortlists = get_shortlist_by_position_staff(int_staff_id, int_position_id)
         if shortlists is None:
             return jsonify({"error": "No shortlists found for this position"}), 404
         return jsonify(shortlists), 200

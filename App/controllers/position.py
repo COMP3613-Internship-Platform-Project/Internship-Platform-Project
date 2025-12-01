@@ -1,4 +1,4 @@
-from App.models import Position, Employer, Shortlist
+from App.models import Position, Employer
 from App.database import db
 from sqlalchemy.exc import SQLAlchemyError
 
@@ -11,29 +11,6 @@ def create_position(employer_id: int, title: str, number_of_positions: int):
     existing_position = Position.query.filter_by(employer_id=employer.id, title=title, number_of_positions=number_of_positions).first()
 
     #preventing duplicate position
-    if existing_position:
-        return f"Internship position already exists"
-    
-    try:
-        position = Position(title=title, employer_id=employer.id, number=number_of_positions)
-        db.session.add(position)
-        db.session.commit()
-        return position
-    except SQLAlchemyError as e:
-        db.session.rollback() 
-        raise Exception(f"Error creating internship position: {e}")
-
-def open_position(employer_id: int, title: str, number_of_positions: int):
-    employer: Employer | None = db.session.get(Employer, employer_id)
-    if employer is None:
-        return f"Employer with ID {employer_id} does not exist"
-    
-    existing_position = Position.query.filter_by(
-        title=title, 
-        number_of_positions=number_of_positions, 
-        employer_id=employer.id
-    ).first()
-
     if existing_position:
         return f"Internship position already exists"
     
