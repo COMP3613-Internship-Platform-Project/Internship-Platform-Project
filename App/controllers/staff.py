@@ -116,65 +116,57 @@ def get_shortlist_by_position_staff(position_id: int, staff_id: int): #Marishel 
     except SQLAlchemyError as e:
         raise Exception(f"Error retrieving shortlists: {e}")
 
-def view_applications(staff_id: int):
+def get_all_applications(staff_id:int): #Marishel - added function to get all applications checking to ensure user is staff
     try:
-        staff = Staff.query.get(staff_id)
+        staff = db.session.query(Staff).filter_by(id=staff_id).first()
         if not staff:
-            return None
+            return f"Only staff members can access applications. Staff with ID {staff_id} does not exist."
         
-        applications = Application.query.all()
+        applications = db.session.query(Application).all()
         applications_data = []
-
         for application in applications:
-            position = Position.query.get(application.position_id)
-            student = Student.query.get(application.student_id)
-
-            employer_name = position.employer.username if position and position.employer else "N/A"
-            position_title = f"{position.title} ({position.id})" if position else "N/A"
-
+            student = db.session.query(Student).filter_by(id=application.student_id).first()
+            position = db.session.query(Position).filter_by(id=application.position_id).first()
+            employer = db.session.query(Employer).filter_by(id=position.employer_id).first()
             applications_data.append({
                 "application_id": application.id,
-                "employer_username": employer_name,
-                "position_title": position_title,
-                "application_state_value": application.state_value,
-                "student_id": student.id if student else None,
-                "student_username": student.username if student else "N/A",
-                "student_email": student.email if student else "N/A",
-                "student_skills": student.skills if student else []
-            })
-        return applications_data
-    except SQLAlchemyError as e:
-        return f"Error viewing applications: {e}"
-
-def view_applications_by_position(staff_id: int, position_id: int):
-    try:
-        staff = Staff.query.get(staff_id)
-        if not staff:
-            return None
-        
-        applications = Application.query.filter_by(position_id=position_id).all()
-        applications_data = []
-
-        for application in applications:
-            position = Position.query.get(application.position_id)
-            student = Student.query.get(application.student_id)
-
-            employer_name = position.employer.username if position and position.employer else "N/A"
-            position_title = f"{position.title} ({position.id})" if position else "N/A"
-
-            applications_data.append({
-                "application_id": application.id,
-                "employer_username": employer_name,
-                "position_title": position_title,
+                "employer_name": employer.username,
+                "position_title": position.title,
                 "application_status": application.state_value,
-                "student_id": student.id if student else None,
-                "student_username": student.username if student else "N/A",
-                "student_email": student.email if student else "N/A",
-                "student_skills": student.skills if student else []
+                "student_email": student.email,
+                "student_id": student.id,
+                "student_username": student.username,
             })
         return applications_data
     except SQLAlchemyError as e:
-        return f"Error viewing applications by position: {e}"
+        raise Exception(f"Error retrieving applications: {e}")
+
+def get_applications_by_position(staff_id:int, position_id:int): # Marishel - added function to get applications by position ID and checking to ensure user is staff
+    try:
+        staff = db.session.query(Staff).filter_by(id=staff_id).first()
+        if not staff:
+            return f"Only staff members can access applications. Staff with ID {staff_id} does not exist."
+        position = db.session.query(Position).filter_by(id=position_id).first()
+        if not position:
+            return f"Position with ID {position_id} does not exist."
+        
+        applications = db.session.query(Application).filter_by(position_id=position_id).all()
+        applications_data = []
+        for application in applications:
+            student = db.session.query(Student).filter_by(id=application.student_id).first()
+            employer = db.session.query(Employer).filter_by(id=position.employer_id).first()
+            applications_data.append({
+                "application_id": application.id,
+                "employer_name": employer.username,
+                "position_title": position.title,
+                "application_status": application.state_value,
+                "student_email": student.email,
+                "student_id": student.id,
+                "student_username": student.username,
+            })
+        return applications_data
+    except SQLAlchemyError as e:
+        raise Exception(f"Error retrieving applications: {e}")
 
 def view_positions(staff_id: int):
     try:

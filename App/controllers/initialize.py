@@ -1,4 +1,4 @@
-from App.controllers.staff import create_staff, list_students, get_all_shortlists, view_positions, view_applications, view_applications_by_position, get_shortlist_by_position_staff
+from App.controllers.staff import create_staff, list_students, get_all_shortlists, get_all_applications, get_applications_by_position, view_positions, get_shortlist_by_position_staff
 from App.controllers.employer import create_employer
 from App.controllers.student import create_student
 from App.controllers.application import create_application
@@ -60,6 +60,6 @@ def initialize():
     print("Viewing Shortlist by Position:")
     print(get_shortlist_by_position_staff(position.id, staff.id))
     print("Viewing Applications:")
-    print(view_applications(staff.id))
+    print(get_all_applications(staff.id))
     print("Viewing Applications by Position:")
-    print(view_applications_by_position(staff.id, position.id))
+    print(get_applications_by_position(staff.id, position.id))
