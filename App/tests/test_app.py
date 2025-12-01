@@ -140,9 +140,17 @@ class UserIntegrationTests(unittest.TestCase):
                        "email":"mimi@example.com",} , users_json)
         
     #authentication test
-    def test_login(self):
+    def test_login(self): 
         user = create_user("bob", "bobpass","bob@example.com")
         assert login("bob", "bobpass") != None
+
+    def test_invalid_login(self): #add to doc 
+        user = create_user("bob", "bobpass","bob@example.com")
+        assert login("bob", "wrongpass") == None
+
+    def test_duplicate_user_creation(self): #add to doc 
+        user = create_user("bob", "bobpass","bob@example.com")
+        with self.assertRaises(Exception):create_user("bob", "anotherpass","bob2@example.com")
 
     def test_authenticate(self):
         student = create_student("student", "studentpass", "student@mail.com", ["Java", "C++"])
@@ -203,6 +211,20 @@ class UserIntegrationTests(unittest.TestCase):
         close_position(position.id, employer.id)
         assert position.status == "Closed"
 
+    def test_close_position_unauthorized(self): #add to doc 
+        employer1 = create_employer("Amazon", "amazonpass","amazon@mail.com")
+        employer2 = create_employer("eBay", "ebaypass","ebay@mail.com")
+        position = create_position(employer1.id, "Data Analyst Intern", 3)
+        result = close_position(position.id, employer2.id)
+        assert result == f"Employer with ID {employer2.id} is not authorized to close this position."
+
+    def test_close_already_closed_position(self): #add to doc
+        employer = create_employer("Amazon", "amazonpass","amazon@mail.com")
+        position = create_position(employer.id, "Data Analyst Intern", 3)
+        close_position(position.id, employer.id)
+        result = close_position(position.id, employer.id)
+        assert result == f"Position with ID {position.id} has been closed."
+
     def test_view_all_positions(self):
         employer = create_employer("Facebook", "facebookpass","facebook@mail.com")
         position1 = create_position(employer.id, "Web Developer Intern", 4)
@@ -220,6 +242,19 @@ class UserIntegrationTests(unittest.TestCase):
         student = create_student("alice", "alicepass","alice@mail.com", ["JavaScript", "React"])
         application = create_application(student.id, position.id)
         assert application != None
+
+    def test_create_application_position_closed(self): #add to doc 
+        employer = create_employer("Airbnb", "airbnbpass","airbnb@mail.com")
+        position = create_position(employer.id, "Web developer Intern", 4)
+        student = create_student("alice", "alicepass","alice@mail.com", ["JavaScript", "React"])
+        message = close_position(position.id, employer.id)
+        result = create_application(student.id, position.id)
+        assert result == f"Cannot apply to Position ID {position.id} as it is not open."
+
+    def test_create_application_nonexistent_position(self): #add to doc
+        student = create_student("alice", "alicepass","alice@mail.com", ["JavaScript", "React"])
+        result = create_application(student.id, 82)  # Assuming 82 is a non-existent position ID
+        assert result == f"Position with ID 82 does not exist."
 
     def test_view_all_applications(self):
         employer = create_employer("Tesla", "teslapass","tesla@mail.com")
@@ -337,6 +372,14 @@ class UserIntegrationTests(unittest.TestCase):
         shortlist = create_shortlist(position.id, staff.id)
         assert shortlist != None
 
+    def test_create_duplicate_shortlist(self): #add to doc
+        employer = create_employer("Netflix", "netflixpass","netflix@mail.com")
+        position = create_position(employer.id, "Content Intern", 2)
+        staff = create_staff("trudy", "trudypass","trudy@mail.com")
+        shortlist1 = create_shortlist(position.id, staff.id)
+        shortlist2 = create_shortlist(position.id, staff.id)
+        assert shortlist2 == f"Shortlist for Position ID {position.id} already exists."
+
     def test_add_application_to_shortlist(self):
         employer = create_employer("Uber", "uberpass","uber@mail.com")
         position = create_position(employer.id, "Logistics Intern", 3)
@@ -347,6 +390,16 @@ class UserIntegrationTests(unittest.TestCase):
         added_shortlist = add_application_to_shortlist(application.id, shortlist.id)
         assert added_shortlist != None
 
+    def test_add_application_to_shortlist_twice(self): #add to doc
+        employer = create_employer("Uber", "uberpass","uber@mail.com")
+        position = create_position(employer.id, "Logistics Intern", 3)
+        staff = create_staff("trudy", "trudypass","trudy@mail.com")
+        student = create_student("john", "johnpass","john@mail.com", ["HTML", "CSS"])
+        application = create_application(student.id, position.id)
+        shortlist = create_shortlist(position.id, staff.id)
+        add_application_to_shortlist(staff.id, application.id)
+        result = add_application_to_shortlist(staff.id, application.id)
+        assert result == f"Application with ID {application.id} is already in the shortlist for Position ID {position.id}."
 
     def test_get_shortlist_by_position_staff(self):
         employer = create_employer("Google", "googlepass","google@mail.com")
@@ -361,6 +414,7 @@ class UserIntegrationTests(unittest.TestCase):
         "employer_username": employer.username,
         "applications": "No applications in this shortlist."
     })
+        
         
     def test_get_shortlist_by_position_employer(self):
         employer = create_employer("Google", "googlepass","google@mail.com")
@@ -414,6 +468,15 @@ class UserIntegrationTests(unittest.TestCase):
             "applications": "No applications in this shortlist."
         }])
 
+    def test_view_all_shortlists_unauthorized(self): #add to doc 
+        employer = create_employer("Spotify", "spotifypass","spotify@mail.com")
+        position = create_position(employer.id, "Music Intern", 3)
+        staff = create_staff("trudy", "trudypass","trudy@mail.com")
+        shortlist = create_shortlist(position.id, staff.id)
+        student = create_student("harry", "harrypass","harry@mail.com", ["C#", "HTML"])
+        shortlists = get_all_shortlists(student.id)
+        assert shortlists == f"Only staff members can access shortlists. Staff with ID {student.id} does not exist."
+
     def test_view_my_shortlisted_applications(self):
         employer = create_employer("Adobe", "adobepass","adobe@mail.com")
         position = create_position(employer.id, "Design Intern", 2)
@@ -445,6 +508,17 @@ class UserIntegrationTests(unittest.TestCase):
         accept_student(employer.id, position.id, student.id)
         self.assertEqual(application.state_value, "Accepted")
 
+    def test_accept_unshortlisted_application(self): #add to doc
+        employer = create_employer("Airbnb", "airbnbpass", "airbnb@mail.com")
+        position = create_position(employer.id, "Hospitality Intern", 4)
+        staff = create_staff("trudy", "trudypass", "trudy@mail.com")
+        student = create_student("alice", "alicepass", "alice@mail.com", ["Java", "React"])
+        application = create_application(student.id, position.id)
+        shortlist = create_shortlist(position.id, staff.id)
+        result = accept_student(employer.id, position.id, student.id)
+        assert result == "Only shortlisted applications can be accepted."
+    
+
     def test_reject_student(self):
         employer = create_employer("Airbnb", "airbnbpass","airbnb@mail.com")
         position = create_position(employer.id, "Hospitality Intern", 4)
@@ -455,3 +529,16 @@ class UserIntegrationTests(unittest.TestCase):
         add_application_to_shortlist(staff.id, application.id)
         reject_student(employer.id, position.id, student.id)
         self.assertEqual(application.state_value, "Rejected")
+
+    def test_reject_unauthoried_employer(self): #add to doc
+        employer1 = create_employer("Airbnb", "airbnbpass","airbnb@mail.com")
+        employer2 = create_employer("VRBO", "vrbopass","vrbo@mail.com")
+        position = create_position(employer1.id, "AI Intern", 4)
+        staff = create_staff("trudy", "trudypass","trudy@mail.com")
+        student = create_student("alice", "alicepass","alice@mail.com", ["Java", "React"])
+        application = create_application(student.id, position.id)
+        shortlist = create_shortlist(position.id, staff.id)
+        add_application_to_shortlist(staff.id, application.id)
+        result = reject_student(employer2.id, position.id, student.id)
+        assert result == f"Employer with ID {employer2.id} is not authorized to reject students for this position."
+

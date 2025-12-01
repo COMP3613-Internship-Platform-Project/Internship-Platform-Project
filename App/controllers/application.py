@@ -20,7 +20,7 @@ def create_application(student_id, position_id):
         if existing_application:
             return f"Application for Student ID {student_id} to Position ID {position_id} already exists."
 
-        if position.status != "open":
+        if position.status == "Open":
             application = Application(student_id=student.id, position_id=position.id)
             db.session.add(application)
             db.session.commit()
