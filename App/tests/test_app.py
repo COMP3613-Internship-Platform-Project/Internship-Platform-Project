@@ -34,7 +34,10 @@ from App.controllers import (
     get_applications_by_student,
     get_application_by_student_and_position,
     get_shortlist_by_position_employer, 
-    get_all_shortlists_by_employer
+    get_all_shortlists_by_employer, 
+    view_my_shortlisted_applications, 
+    accept_student, 
+    reject_student
 )
 
 
@@ -410,3 +413,45 @@ class UserIntegrationTests(unittest.TestCase):
             "employer_username": employer.username,
             "applications": "No applications in this shortlist."
         }])
+
+    def test_view_my_shortlisted_applications(self):
+        employer = create_employer("Adobe", "adobepass","adobe@mail.com")
+        position = create_position(employer.id, "Design Intern", 2)
+        staff = create_staff("trudy", "trudypass","trudy@mail.com")
+        student = create_student("eva", "evapass","eva@mail.com", ["Design", "Photoshop"])
+        application = create_application(student.id, position.id)
+        create_shortlist(position.id, staff.id)
+        add_application_to_shortlist(staff.id, application.id)
+        shortlisted_applications = view_my_shortlisted_applications(student.id)
+        expected_application = {
+            "employer_name": employer.username,
+            "position_title": position.title,
+            "application_status": "Shortlisted",
+            "student_id": student.id,
+            "student_name": student.username,
+            "student_email": student.email,
+            "student_skills": student.skills
+        }
+        self.assertIn(expected_application, shortlisted_applications)
+
+    def test_accept_student(self):
+        employer = create_employer("Airbnb", "airbnbpass","airbnb@mail.com")
+        position = create_position(employer.id, "Hospitality Intern", 4)
+        staff = create_staff("trudy", "trudypass","trudy@mail.com")
+        student = create_student("alice", "alicepass","alice@mail.com", ["Java", "React"])
+        application = create_application(student.id, position.id)
+        shortlist = create_shortlist(position.id, staff.id)
+        add_application_to_shortlist(staff.id, application.id)
+        accept_student(employer.id, position.id, student.id)
+        self.assertEqual(application.state_value, "Accepted")
+
+    def test_reject_student(self):
+        employer = create_employer("Airbnb", "airbnbpass","airbnb@mail.com")
+        position = create_position(employer.id, "Hospitality Intern", 4)
+        staff = create_staff("trudy", "trudypass","trudy@mail.com")
+        student = create_student("alice", "alicepass","alice@mail.com", ["Java", "React"])
+        application = create_application(student.id, position.id)
+        shortlist = create_shortlist(position.id, staff.id)
+        add_application_to_shortlist(staff.id, application.id)
+        reject_student(employer.id, position.id, student.id)
+        self.assertEqual(application.state_value, "Rejected")

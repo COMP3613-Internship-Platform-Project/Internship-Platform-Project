@@ -1,4 +1,4 @@
-from App.models import Student
+from App.models import Student, Position, Employer
 from App.database import db
 from sqlalchemy.exc import SQLAlchemyError
 from App.models.application import Application
@@ -13,29 +13,30 @@ def create_student(username: str, password: str, email: str, skills: list):
         db.session.rollback()
         raise Exception(f"Error creating student: {e}")
 
-def view_my_applications(student_id):
+def get_applications_by_student(student_id: int): #Marishel - added function to get applications by student ID
     try:
-        student: Student | None = Student.query.get(student_id)
+        student = db.session.get(Student, student_id)
         if not student:
             return f"Student with ID {student_id} does not exist."
         
-        applications = Application.query.filter_by(student_id=student.id).all()
-        result = []
+        applications = db.session.query(Application).filter_by(student_id=student_id).all()
+        applications_data = []
         for application in applications:
-            position = application.position
-            employer = position.employer if position else None
-            result.append({
-                "employer_name": employer.username if employer else None,
-                "position_title": position.title if position else None,
-                "application_status": application.state_value,
-                "student_id": student.id,
-                "student_name": student.username,
-                "student_email": student.email,
-                "student_skills": student.skills if isinstance(student.skills, list) else []
-            })
-        return result
+            position = db.session.query(Position).filter_by(id=application.position_id).first()
+            if position: 
+                employer = db.session.query(Employer).filter_by(id=position.employer_id).first()
+                applications_data.append({
+                    "employer_name": employer.username,
+                    "position_title": position.title,
+                    "application_status": application.state_value,
+                    "studnet_email": student.email,
+                    "student_id": student.id,
+                    "student_username": student.username,
+                    "student_skills": student.skills,
+                })
+        return applications_data
     except SQLAlchemyError as e:
-        raise Exception(f"Error retrieving student's applications: {e}")
+        raise Exception(f"Error retrieving applications: {e}")
 
 def view_my_shortlisted_applications(student_id):
     try:
@@ -64,7 +65,33 @@ def view_my_shortlisted_applications(student_id):
             return f"No shortlisted applications found for Student ID {student_id}."
     except SQLAlchemyError as e:
         raise Exception(f"Error retrieving student's shortlist: {e}")
-    
+
+def get_application_by_student_and_position(student_id:int, position_id:int): #Marishel - added function to get application by student ID and position ID
+    try:
+        student = db.session.query(Student).filter_by(id=student_id).first()
+        position = db.session.query(Position).filter_by(id=position_id).first()
+        if not student:
+            return f"Student with ID {student_id} does not exist."
+        if not position:
+            return f"Position with ID {position_id} does not exist."
+        
+        application = db.session.query(Application).filter_by(student_id=student_id, position_id=position_id).first() 
+        if application: #Marishel : refactored return 
+            return {
+                "application_id": application.id,
+                "employer_name": db.session.query(Employer).filter_by(id=position.employer_id).first().username,
+                "position_title": position.title,
+                "application_status": application.state_value,
+                "student_email": student.email,
+                "student_id": student.id,
+                "student_username": student.username,
+            }
+        else:
+            return f"No application found for Student ID {student_id} and Position ID {position_id}."
+    except SQLAlchemyError as e:
+        raise Exception(f"Error retrieving application: {e}")
+
+
 def student_reject_position(student_id, position_id):
     try:
         student: Student | None = Student.query.get(student_id)
