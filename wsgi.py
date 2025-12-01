@@ -14,10 +14,10 @@ from App.controllers.staff import (
     create_staff,
     view_positions,
     list_students,
-    view_shortlists,
-    view_shortlist_by_position,
+    get_all_shortlists,
     view_applications,
     view_applications_by_position,
+    get_shortlist_by_position_staff
 )
 from App.controllers.application import (
     create_application,
@@ -27,7 +27,7 @@ from App.controllers.application import (
 from App.controllers.shortlist import create_shortlist
 from App.controllers.employer import (
     create_employer,
-    get_shortlisted_applications_for_employer,
+    get_all_shortlists_by_employer,
     accept_student,
     reject_student,
 )
@@ -205,7 +205,7 @@ def view_applications_by_position_command(staff_id, position_id):
 @staff_cli.command("shortlists", help="Views all shortlists")
 @click.argument("staff_id", default=1)
 def view_shortlists_command(staff_id):
-    shortlists = view_shortlists(staff_id)
+    shortlists = get_all_shortlists(staff_id)
     if isinstance(shortlists, list) and shortlists:
         for shortlist in shortlists:
             print(shortlist)
@@ -217,7 +217,7 @@ def view_shortlists_command(staff_id):
 @click.argument("staff_id", default=1)
 @click.argument("position_id", default=1)
 def view_shortlists_by_position_command(staff_id, position_id):
-    shortlists = view_shortlist_by_position(staff_id, position_id)
+    shortlists = get_shortlist_by_position_staff(position_id, staff_id)
     if isinstance(shortlists, list) and shortlists:
         for shortlist in shortlists:
             print(shortlist)
@@ -248,7 +248,7 @@ employer_cli = AppGroup('employer', help='Employer object commands')
 @employer_cli.command("shortlists", help="Views all employer shortlists")
 @click.argument("employer_id", default=3)
 def view_employer_shortlists_command(employer_id):
-    shortlists = get_shortlisted_applications_for_employer(employer_id)
+    shortlists = get_all_shortlists_by_employer(employer_id)
     if isinstance(shortlists, list) and shortlists:
         for shortlist in shortlists:
             print(shortlist)

@@ -5,7 +5,6 @@ from App.models.employer import Employer
 from App.models.shortlist import Shortlist
 from sqlalchemy.exc import SQLAlchemyError
 from App.controllers.shortlist import create_shortlist
-from App.models.application_states import ShortlistedState
 
 def create_application(student_id, position_id):
     try:

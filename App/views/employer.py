@@ -5,7 +5,7 @@ from App.controllers import (
     is_employer,
     get_user_by_username,
     create_employer,
-    get_shortlisted_applications_for_employer,
+    get_all_shortlists_by_employer,
     accept_student,
     reject_student,
     get_jwt_identity
@@ -54,7 +54,7 @@ def view_shortlisted_applications(employer_id):
         return jsonify({"error": "Access denied - can only view shortlisted applications for your own position"}), 401
     
     try:
-        result = get_shortlisted_applications_for_employer(int_employer_id)
+        result = get_all_shortlists_by_employer(int_employer_id)
         if result is None:
             return jsonify({"error": "No shortlisted applications found"}), 404
         return jsonify(result), 200

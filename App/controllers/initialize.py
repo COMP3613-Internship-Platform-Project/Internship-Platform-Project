@@ -1,9 +1,9 @@
-from App.controllers.staff import create_staff, list_students, view_shortlists, view_positions, view_shortlist_by_position, view_applications, view_applications_by_position
+from App.controllers.staff import create_staff, list_students, get_all_shortlists, view_positions, view_applications, view_applications_by_position, get_shortlist_by_position_staff
 from App.controllers.employer import create_employer
 from App.controllers.student import create_student
 from App.controllers.application import create_application
 from App.controllers.shortlist import create_shortlist
-from .position import open_position
+from .position import create_position
 from App.database import db
 
 
@@ -20,11 +20,11 @@ def initialize():
     student = create_student("Johndoe", "johndoepass", "john.doe@student.com", ["Java", "Python", "React"])
     student2 = create_student("Acelaw", "acepass", "ace.law@student.com", ["R", "Python", "SQL"])
 
-    position = open_position(
+    position = create_position(
         int(employer.id), "Software Engineer", 2
     )
 
-    position2 = open_position(
+    position2 = create_position(
         int(employer2.id), "Data Analyst", 3
     )
 
@@ -54,11 +54,11 @@ def initialize():
     print("Listing Students:")
     print(list_students(staff.id))
     print("Viewing Shortlists:")
-    print(view_shortlists(staff.id))
+    print(get_all_shortlists(staff.id))
     print("Viewing Positions:")
     print(view_positions(staff.id))
     print("Viewing Shortlist by Position:")
-    print(view_shortlist_by_position(staff.id, position.id))
+    print(get_shortlist_by_position_staff(position.id, staff.id))
     print("Viewing Applications:")
     print(view_applications(staff.id))
     print("Viewing Applications by Position:")
