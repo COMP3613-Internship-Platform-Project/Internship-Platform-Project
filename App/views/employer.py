@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, request
-from flask_jwt_extended import jwt_required
+from flask_jwt_extended import jwt_required 
 from App.models import Employer
 from App.controllers import (
     is_employer,
@@ -8,6 +8,8 @@ from App.controllers import (
     get_all_shortlists_by_employer,
     accept_student,
     reject_student,
+    get_shortlist_by_position_employer, 
+    list_positions_by_employer,
     get_jwt_identity
 )
 
@@ -26,6 +28,38 @@ def create_employer_endpoint():
         if employer is None:
             return jsonify({"error": "Failed to create employer"}), 400
         return jsonify({"message": "Employer account created", "employer_id": employer.id}), 201
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@employer_views.route('/api/employer/<employer_id>/positions', methods=['GET'])
+@jwt_required()
+def view_my_positions(employer_id):
+    authenticated_employer_id = get_jwt_identity()
+
+    #check if the requester is an employer
+    if not is_employer(authenticated_employer_id):
+        return jsonify({"error": "Access denied - employer authorization required"}), 401
+    
+    #check for employer id format
+    try:
+        int_employer_id = int(employer_id)
+    except ValueError:  
+        return jsonify({"error": "Invalid employer ID format"}), 400
+    
+    #check if the employer exists
+    employer = Employer.query.get(int_employer_id)
+    if not employer:
+        return jsonify({"error": "Employer not found"}), 404
+
+    #check if the requester is trying to access their own positions
+    if int(authenticated_employer_id) != int_employer_id:
+        return jsonify({"error": "Access denied - can only view your own positions"}), 401
+    
+    try:
+        positions = list_positions_by_employer(int_employer_id)
+        if positions is None:
+            return jsonify({"error": "No positions found"}), 404
+        return jsonify(positions), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     
@@ -57,6 +91,39 @@ def view_shortlisted_applications(employer_id):
         result = get_all_shortlists_by_employer(int_employer_id)
         if result is None:
             return jsonify({"error": "No shortlisted applications found"}), 404
+        return jsonify(result), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    
+@employer_views.route('/api/employer/<employer_id>/shortlists/position/<position_id>', methods=['GET'])
+@jwt_required()
+def view_position_shortlist(employer_id, position_id):
+    authenticated_employer_id = get_jwt_identity()
+
+    #check if the requester is an employer
+    if not is_employer(authenticated_employer_id):
+        return jsonify({"error": "Access denied - employer authorization required"}), 401
+    
+    #check for employer and position id format
+    try:
+        int_employer_id = int(employer_id)
+        int_position_id = int(position_id)
+    except ValueError:  
+        return jsonify({"error": "Invalid ID format"}), 400
+    
+    #check if the employer exists
+    employer = Employer.query.get(int_employer_id)
+    if not employer:
+        return jsonify({"error": "Employer not found"}), 404
+
+    #check if the requester is trying to access their own position shortlist
+    if int(authenticated_employer_id) != int_employer_id:
+        return jsonify({"error": "Access denied - can only view shortlisted applications for your own position"}), 401
+    
+    try:
+        result = get_shortlist_by_position_employer(int_position_id, int_employer_id)
+        if result is None:
+            return jsonify({"error": "No shortlisted applications found for this position"}), 404
         return jsonify(result), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500

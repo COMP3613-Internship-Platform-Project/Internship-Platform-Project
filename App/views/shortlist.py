@@ -16,8 +16,8 @@ def create_shortlist_route():
     data = request.json
     
     position_id = data['position_id']
-    poistion = Position.query.get(position_id)
-    if not poistion:
+    position = Position.query.get(position_id)
+    if not position:
         return jsonify({"error": f"Position with ID {position_id} does not exist"}), 400
     
     try:
