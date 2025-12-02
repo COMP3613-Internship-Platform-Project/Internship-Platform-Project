@@ -3,6 +3,7 @@ import os, tempfile, pytest, logging, unittest
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from App.controllers.application import create_application
+from App.controllers.student import student_reject_position, view_open_positions_by_student
 from App.main import create_app
 from App.database import db, create_db
 from App.models import User, Employer, Staff, Student
@@ -329,7 +330,7 @@ class UserIntegrationTests(unittest.TestCase):
             "employer_name": employer.username,
                     "position_title": position.title,
                     "application_status": application.state_value,
-                    "studnet_email": student.email,
+                    "student_email": student.email,
                     "student_id": student.id,
                     "student_username": student.username,
                     "student_skills": student.skills,
@@ -338,7 +339,7 @@ class UserIntegrationTests(unittest.TestCase):
             "employer_name": employer.username,
                     "position_title": position.title,
                     "application_status": application2.state_value,
-                    "studnet_email": student2.email,
+                    "student_email": student2.email,
                     "student_id": student2.id,
                     "student_username": student2.username,
                     "student_skills": student2.skills,
@@ -477,6 +478,17 @@ class UserIntegrationTests(unittest.TestCase):
         shortlists = get_all_shortlists(student.id)
         assert shortlists == f"Only staff members can access shortlists. Staff with ID {student.id} does not exist."
 
+    def test_view_open_positions_by_student(self):
+        # Create a student and two open positions
+        student = create_student("openpos", "openpass", "openpos@mail.com", ["Python"])
+        employer = create_employer("OpenInc", "openpass", "openinc@mail.com")
+        position1 = create_position(employer.id, "Backend Intern", 2)
+        position2 = create_position(employer.id, "Frontend Intern", 1)
+        # Should return both positions
+        positions = view_open_positions_by_student(student.id)
+        self.assertIn(position1.toJSON(), positions)
+        self.assertIn(position2.toJSON(), positions)
+
     def test_view_my_shortlisted_applications(self):
         employer = create_employer("Adobe", "adobepass","adobe@mail.com")
         position = create_position(employer.id, "Design Intern", 2)
@@ -507,17 +519,25 @@ class UserIntegrationTests(unittest.TestCase):
         add_application_to_shortlist(staff.id, application.id)
         accept_student(employer.id, position.id, student.id)
         self.assertEqual(application.state_value, "Accepted")
+    
 
-    def test_accept_unshortlisted_application(self): #add to doc
+    def test_student_reject_position(self):
         employer = create_employer("Airbnb", "airbnbpass", "airbnb@mail.com")
         position = create_position(employer.id, "Hospitality Intern", 4)
         staff = create_staff("trudy", "trudypass", "trudy@mail.com")
         student = create_student("alice", "alicepass", "alice@mail.com", ["Java", "React"])
         application = create_application(student.id, position.id)
         shortlist = create_shortlist(position.id, staff.id)
-        result = accept_student(employer.id, position.id, student.id)
-        assert result == "Only shortlisted applications can be accepted."
-    
+        add_application_to_shortlist(staff.id, application.id)
+        accept_student(employer.id, position.id, student.id)
+        self.assertEqual(application.state_value, "Accepted")
+
+        #rejecting position in accepted state
+        result = student_reject_position(student.id, position.id)
+        self.assertIn("has rejected Position ID", result)
+        # attempting to reject position again (should not be allowed)
+        result2 = student_reject_position(student.id, position.id)
+        self.assertIn("Application is not in an accepted state", result2)
 
     def test_reject_student(self):
         employer = create_employer("Airbnb", "airbnbpass","airbnb@mail.com")

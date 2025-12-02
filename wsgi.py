@@ -7,31 +7,40 @@ from App.controllers.initialize import initialize
 from App.controllers.user import get_all_users, get_all_users_json
 from App.controllers.student import (
     create_student,
+    view_open_positions_by_student,
+    get_applications_by_student,
+    get_application_by_student_and_position,
     view_my_shortlisted_applications,
-    student_reject_position,
+    student_reject_position
 )
 from App.controllers.staff import (
     create_staff,
     view_positions,
     list_students,
     get_all_shortlists,
-    view_applications,
-    view_applications_by_position,
-    get_shortlist_by_position_staff
+    get_shortlist_by_position_staff,
+    get_all_applications,
+    get_applications_by_position
 )
+
 from App.controllers.application import (
     create_application,
-    get_applications_by_student,
     add_application_to_shortlist,
 )
 from App.controllers.shortlist import create_shortlist
 from App.controllers.employer import (
     create_employer,
     get_all_shortlists_by_employer,
+    get_shortlist_by_position_employer,
+    list_positions_by_employer,
     accept_student,
     reject_student,
 )
-from App.controllers.position import create_position
+from App.controllers.position import (
+    create_position,
+    close_position,
+    reopen_position
+)
 
 
 # This commands file allow you to create convenient CLI commands for testing controllers
@@ -44,6 +53,43 @@ migrate = get_migrate(app)
 def init():
     initialize()
     print('database intialized')
+
+@app.cli.command("help", help="Show CLI help for all commands")
+def show_help():
+    print("\nFlask CLI Command Reference\n" + "-"*32)
+    print("flask init")
+    print("    Initialize the database\n")
+    print("User Commands:")
+    print("  flask user list                                List all users")
+    print("  flask user create-staff                        Create a new staff member (interactive)")
+    print("  flask user create-employer                     Create a new employer (interactive)")
+    print("  flask user create-student                      Create a new student (interactive)\n")
+    print("Student Commands:")
+    print("  flask student view-positions <student_id>       List all open positions for a student")
+    print("  flask student apply <student_id> <position_id>  Apply to a position")
+    print("  flask student get-all-applications <student_id> View all applications for a student")
+    print("  flask student get-position-application <student_id> <position_id>  View application for a specific position")
+    print("  flask student get-shortlists <student_id>       View all shortlists for a student")
+    print("  flask student reject-position <student_id> <position_id>  Reject a position\n")
+    print("Staff Commands:")
+    print("  flask staff positions <staff_id>                List all positions")
+    print("  flask staff create-shortlist <position_id> <staff_id>  Create a shortlist for a position")
+    print("  flask staff students <staff_id>                 List all students")
+    print("  flask staff applications <staff_id>             View all applications")
+    print("  flask staff applications-by-position <staff_id> <position_id>  View applications by position")
+    print("  flask staff shortlists <staff_id>               View all shortlists")
+    print("  flask staff shortlists-by-position <position_id> <staff_id>  View shortlists by position")
+    print("  flask staff shortlist-application <staff_id> <application_id>  Add application to shortlist\n")
+    print("Employer Commands:")
+    print("  flask employer position <employer_id> <title> <number_of_positions>  Create a position")
+    print("  flask employer close-position <position_id> <employer_id>            Close a position")
+    print("  flask employer reopen-position <position_id> <employer_id>           Reopen a position")
+    print("  flask employer list-positions <employer_id>                          List all positions for an employer")
+    print("  flask employer shortlists <employer_id>                              View all employer shortlists")
+    print("  flask employer shortlists-by-position <position_id> <employer_id>    View shortlists by position")
+    print("  flask employer accept <employer_id> <position_id> <student_id>       Accept a student application")
+    print("  flask employer reject <employer_id> <position_id> <student_id>       Reject a student application\n")
+
 
 '''
 User Commands
@@ -95,7 +141,16 @@ Student Commands
 '''
 student_cli = AppGroup('student', help='Student object commands') 
 
-#Commands go here
+#list all open positions
+@student_cli.command("view-positions", help="Lists all open positions for a student")
+@click.argument("student_id", default=5)
+def list_open_positions_command(student_id):
+    positions = view_open_positions_by_student(student_id)
+    if isinstance(positions, list) and positions:
+        for position in positions:
+            print(position)
+    elif isinstance(positions, str):
+        print(positions)
 
 @student_cli.command("apply", help="Creates an application for a student to a position")
 @click.argument("student_id", default=5)
@@ -107,7 +162,7 @@ def create_application_command(student_id, position_id):
     else:
         print(f'Application created for Student ID {student_id} to Position ID {position_id}')
 
-@student_cli.command("get-applications", help="Gets all applications for a student")
+@student_cli.command("get-all-applications", help="Gets all applications for a student")
 @click.argument("student_id", default=5)
 def get_applications_command(student_id):
     applications = get_applications_by_student(student_id)
@@ -116,6 +171,16 @@ def get_applications_command(student_id):
             print(app)
     elif isinstance(applications, str):
         print(applications)
+
+@student_cli.command("get-position-application", help="Gets student's application for a specific position")
+@click.argument("student_id", default=5)
+@click.argument("position_id", default=2)
+def get_position_application_command(student_id, position_id):
+    application = get_application_by_student_and_position(student_id, position_id)
+    if isinstance(application, dict):
+        print(application)
+    else:
+        print(application)
 
 #Lists a student's shortlisted applications
 @student_cli.command("get-shortlists", help="Gets all shortlists for a student")
@@ -157,15 +222,14 @@ def list_positions_command(staff_id):
 #Create shortlist for a position
 @staff_cli.command("create-shortlist", help="Creates a shortlist for a position")
 @click.argument("position_id", default=3)
-def create_shortlist_command(position_id):
-    shortlist = create_shortlist(position_id)
+@click.argument("staff_id", default=1)
+def create_shortlist_command(position_id, staff_id):
+    shortlist = create_shortlist(position_id, staff_id)
     if isinstance(shortlist, str):
         print(shortlist)
     else:
         print(f'Shortlist created for Position ID {position_id} with Shortlist ID {shortlist.id}')
-
     
-
 #List all Students
 @staff_cli.command("students", help="Lists all students")
 @click.argument("staff_id", default=1)
@@ -177,12 +241,11 @@ def list_students_command(staff_id):
     elif isinstance(students, str):
         print(students)
 
-
 #List all applications
 @staff_cli.command("applications", help="Views all applications")
 @click.argument("staff_id", default=1)
 def view_applications_command(staff_id):
-    applications = view_applications(staff_id)
+    applications = get_all_applications(staff_id)
     if isinstance(applications, list) and applications:
         for application in applications:
             print(application)
@@ -194,7 +257,7 @@ def view_applications_command(staff_id):
 @click.argument("staff_id", default=1)
 @click.argument("position_id", default=1)
 def view_applications_by_position_command(staff_id, position_id):
-    application = view_applications_by_position(staff_id, position_id)
+    application = get_applications_by_position(staff_id, position_id)
     if isinstance(application, list) and application:
         for app in application:
             print(app)
@@ -214,13 +277,15 @@ def view_shortlists_command(staff_id):
 
 #List all shortlists for a position
 @staff_cli.command("shortlists-by-position", help="Views all applications for a position")
-@click.argument("staff_id", default=1)
 @click.argument("position_id", default=1)
-def view_shortlists_by_position_command(staff_id, position_id):
+@click.argument("staff_id", default=1)
+def view_shortlists_by_position_command(position_id, staff_id):
     shortlists = get_shortlist_by_position_staff(position_id, staff_id)
     if isinstance(shortlists, list) and shortlists:
         for shortlist in shortlists:
             print(shortlist)
+    elif isinstance(shortlists, dict):
+        print(shortlists)
     elif isinstance(shortlists, str):
         print(shortlists)
 
@@ -244,17 +309,6 @@ Employer Commands
 '''
 employer_cli = AppGroup('employer', help='Employer object commands') 
 
-#List all employer shortlists, probably should have one to look at shortlists by position too
-@employer_cli.command("shortlists", help="Views all employer shortlists")
-@click.argument("employer_id", default=3)
-def view_employer_shortlists_command(employer_id):
-    shortlists = get_all_shortlists_by_employer(employer_id)
-    if isinstance(shortlists, list) and shortlists:
-        for shortlist in shortlists:
-            print(shortlist)
-    elif isinstance(shortlists, str):
-        print(shortlists)
-
 #Creates a new position
 @employer_cli.command("position", help="Creates a position")
 @click.argument("employer_id", default=3)
@@ -266,7 +320,57 @@ def create_position_command(employer_id, title, number_of_positions):
         print(position)
     else:
         print(f'Position {position.title} created with ID: {position.id}')
+
+@employer_cli.command("close-position", help="Closes a position")
+@click.argument("position_id", default=1)
+@click.argument("employer_id", default=3)
+def close_position_command(position_id, employer_id):
+    result = close_position(position_id, employer_id)
+    print(result)
+
+# Reopen a position
+@employer_cli.command("reopen-position", help="Reopens a closed position")
+@click.argument("position_id", default=1)
+@click.argument("employer_id", default=3)
+def reopen_position_command(position_id, employer_id):
+    result = reopen_position(position_id, employer_id)
+    print(result)
+
+# List positions by employer
+@employer_cli.command("list-positions", help="Lists all positions for an employer")
+@click.argument("employer_id", default=3)
+def list_positions_by_employer_command(employer_id):
+    positions = list_positions_by_employer(employer_id)
+    if isinstance(positions, list) and positions:
+        for position in positions:
+            print(position)
+    elif isinstance(positions, str):
+        print(positions)
     
+#List all employer shortlists, probably should have one to look at shortlists by position too
+@employer_cli.command("shortlists", help="Views all employer shortlists")
+@click.argument("employer_id", default=3)
+def view_employer_shortlists_command(employer_id):
+    shortlists = get_all_shortlists_by_employer(employer_id)
+    if isinstance(shortlists, list) and shortlists:
+        for shortlist in shortlists:
+            print(shortlist)
+    elif isinstance(shortlists, str):
+        print(shortlists)
+
+#List shortlists by position for employer
+@employer_cli.command("shortlists-by-position", help="Views all shortlists for an employer's position")
+@click.argument("position_id", default=1)
+@click.argument("employer_id", default=3)
+def view_employer_shortlists_by_position_command(position_id, employer_id ):
+    shortlists = get_shortlist_by_position_employer(position_id, employer_id)
+    if isinstance(shortlists, list) and shortlists:
+        for shortlist in shortlists:
+            print(shortlist)
+    elif isinstance(shortlists, dict):
+        print(shortlists)
+    elif isinstance(shortlists, str):
+        print(shortlists)
 
 #Accept a student application from a shortlist
 @employer_cli.command("accept", help="Accepts an application from a shortlist")

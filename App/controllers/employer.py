@@ -18,7 +18,23 @@ def create_employer(username: str, password: str, email: str):
         db.session.rollback()
         raise Exception(f"Error creating employer: {e}")
 
-def get_all_shortlists_by_employer(employer_id: int): #Marishel - added employer id as employers are the only ones who would view their shortlists
+def list_positions_by_employer(employer_id: int): 
+    try:
+        employer: Employer | None = db.session.get(Employer, employer_id)
+        if employer is None:
+            return f"Employer with ID {employer_id} does not exist"
+        
+        positions = Position.query.filter_by(employer_id=employer.id).all()
+        if not positions:
+            return f"No positions found for Employer with ID {employer_id}"
+        positions_data = []
+        for position in positions:
+            positions_data.append(position.toJSON())
+        return positions_data
+    except SQLAlchemyError as e:
+        return f"Error listing positions: {e}"
+
+def get_all_shortlists_by_employer(employer_id: int):
     try:
         employer = db.session.query(Employer).filter_by(id=employer_id).first()
         if not employer:
