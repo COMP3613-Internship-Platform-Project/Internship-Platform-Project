@@ -32,7 +32,6 @@ def create_application(student_id, position_id):
         raise Exception(f"Error creating application: {e}")
     
 
-#staff id shouldn't be necessary but waiting for confirmation
 def add_application_to_shortlist(staff_id, application_id):
     staff = Staff.query.get(staff_id)
     if not staff:

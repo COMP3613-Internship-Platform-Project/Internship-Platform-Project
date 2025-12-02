@@ -33,7 +33,29 @@ def list_students(staff_id: int):
     except SQLAlchemyError as e:
         return f"Error listing students: {e}"
 
-def get_all_shortlists(staff_id: int): #Marishel - added staff id as staff are the only ones who would view all shortlists
+def view_positions(staff_id: int):
+    try:
+        staff = Staff.query.get(staff_id)
+        if not staff:
+            return None
+        
+        positions = Position.query.all()
+        positions_data = []
+
+        for position in positions:
+            positions_data.append({
+                "id": position.id,
+                "title": position.title,
+                "number_of_positions": position.number_of_positions,
+                "status": position.status if hasattr(position, "status") else "N/A",
+                "employer_id": position.employer_id,
+                "company_name": position.employer.username if position.employer else "N/A"
+            })
+        return positions_data
+    except SQLAlchemyError as e:
+        return f"Error viewing positions: {e}"
+
+def get_all_shortlists(staff_id: int): 
     try:
         staff = db.session.query(Staff).filter_by(id=staff_id).first()
         if not staff:
@@ -167,26 +189,4 @@ def get_applications_by_position(staff_id:int, position_id:int): # Marishel - ad
         return applications_data
     except SQLAlchemyError as e:
         raise Exception(f"Error retrieving applications: {e}")
-
-def view_positions(staff_id: int):
-    try:
-        staff = Staff.query.get(staff_id)
-        if not staff:
-            return None
-        
-        positions = Position.query.all()
-        positions_data = []
-
-        for position in positions:
-            positions_data.append({
-                "id": position.id,
-                "title": position.title,
-                "number_of_positions": position.number_of_positions,
-                "status": position.status if hasattr(position, "status") else "N/A",
-                "employer_id": position.employer_id,
-                "company_name": position.employer.username if position.employer else "N/A"
-            })
-        return positions_data
-    except SQLAlchemyError as e:
-        return f"Error viewing positions: {e}"
     

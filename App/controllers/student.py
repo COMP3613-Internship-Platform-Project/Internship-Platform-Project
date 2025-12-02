@@ -12,6 +12,22 @@ def create_student(username: str, password: str, email: str, skills: list):
     except SQLAlchemyError as e:
         db.session.rollback()
         raise Exception(f"Error creating student: {e}")
+    
+def view_open_positions_by_student(student_id: int): 
+    try:
+        student: Student | None = db.session.get(Student, student_id)
+        if student is None:
+            return f"Student with ID {student_id} does not exist"
+        
+        positions = Position.query.filter_by(status="Open").all()
+        if not positions:
+            return f"No open positions available."
+        positions_data = []
+        for position in positions:
+            positions_data.append(position.toJSON())
+        return positions_data
+    except SQLAlchemyError as e:
+        return f"Error listing positions: {e}"
 
 def get_applications_by_student(student_id: int): #Marishel - added function to get applications by student ID
     try:
@@ -29,7 +45,7 @@ def get_applications_by_student(student_id: int): #Marishel - added function to 
                     "employer_name": employer.username,
                     "position_title": position.title,
                     "application_status": application.state_value,
-                    "studnet_email": student.email,
+                    "student_email": student.email,
                     "student_id": student.id,
                     "student_username": student.username,
                     "student_skills": student.skills,
