@@ -1,7 +1,7 @@
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from App.controllers.application import create_application, get_application_by_student_and_position, add_application_to_shortlist
-
+from App.controllers.application import create_application, add_application_to_shortlist
+from App.controllers.student import get_application_by_student_and_position
 
 application_views = Blueprint('application_views', __name__, template_folder='../templates')
 
