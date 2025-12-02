@@ -167,7 +167,7 @@ def get_applications_by_position(staff_id, position_id):
         int_staff_id = int(staff_id)
         int_position_id = int(position_id)
     except ValueError:
-        return jsonify({"error": "Invalid ID format"}), 400
+        return jsonify({"error": "Invalid staff ID format"}), 400
 
     #check if the staff exists
     staff = Staff.query.get(int_staff_id)
