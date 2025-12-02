@@ -51,16 +51,26 @@ def add_application_to_shortlist(staff_id, application_id):
         return f"Application with ID {application_id} is already in the shortlist for Position ID {application.position_id}."
     
     try:
-        application.shortlist_id = shortlist.id
+        position = Position.query.get(application.position_id)
+        student = Student.query.get(application.student_id)
+        
+        student_skills = student.skills or []
+        position_skills = position.skills or []
 
-        # ensuring application transition strictly from applied to shortlisted state
-        if application.state_value == "Applied":
-            application.shortlist_application()
+        matching_skills = set(student_skills).intersection(set(position_skills))
+        if len(matching_skills) == 0:
+            return f"Student with ID {student.id} does not have the required skills for Position ID {position.id}."
         else:
-            return f"Application with ID {application_id} cannot be shortlisted from state '{application.state_value}'."
+            application.shortlist_id = shortlist.id
 
-        db.session.commit()
-        return application
+            # ensuring application transition strictly from applied to shortlisted state
+            if application.state_value == "Applied":
+                application.shortlist_application()
+            else:
+                return f"Application with ID {application_id} cannot be shortlisted from state '{application.state_value}'."
+
+            db.session.commit()
+            return application
     except SQLAlchemyError as e:
         db.session.rollback()
         raise Exception(f"Error adding application to shortlist: {e}")

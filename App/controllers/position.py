@@ -2,7 +2,7 @@ from App.models import Position, Employer
 from App.database import db
 from sqlalchemy.exc import SQLAlchemyError
 
-def create_position(employer_id: int, title: str, number_of_positions: int):
+def create_position(employer_id: int, title: str, number_of_positions: int, skills: list):
     #check if employer exists
     employer: Employer | None = db.session.get(Employer, employer_id)
     if employer is None:
@@ -15,7 +15,7 @@ def create_position(employer_id: int, title: str, number_of_positions: int):
         return f"Internship position already exists"
     
     try:
-        position = Position(title=title, employer_id=employer.id, number=number_of_positions)
+        position = Position(title=title, employer_id=employer.id, number=number_of_positions, skills=skills)
         db.session.add(position)
         db.session.commit()
         return position

@@ -21,11 +21,11 @@ def initialize():
     student2 = create_student("Acelaw", "acepass", "ace.law@student.com", ["R", "Python", "SQL"])
 
     position = create_position(
-        int(employer.id), "Software Engineer", 2
+        int(employer.id), "Software Engineer", 2, ["Java", "Python", "C++"]
     )
 
     position2 = create_position(
-        int(employer2.id), "Data Analyst", 3
+        int(employer2.id), "Data Analyst", 3, ["Python", "R", "SQL"]
     )
 
     shortlist = create_shortlist(int(position.id), int(staff.id))
