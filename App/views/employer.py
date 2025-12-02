@@ -17,19 +17,23 @@ employer_views = Blueprint('employer_views', __name__, template_folder='../templ
 
 @employer_views.route('/api/employer', methods=['POST'])
 def create_employer_endpoint():
-    data = request.json 
+
+    data = request.get_json()
+    username = data.get("username", "").strip()
+    password = data.get("password", "").strip()
+    email = data.get("email", "").strip()
+
+    if not username or not password or not email:
+        return jsonify({"error": "username, password, and email are required"}), 400
 
     if get_user_by_username(data['username']):
-        return jsonify(error='Username already exists'), 400
+        return jsonify({"error": "Username already taken"}), 400
     
-    employer = create_employer(data['username'], data['password'], data['email'])
+    employer = create_employer(username, password, email)
+    if employer is None:
+        return jsonify({"error": "Failed to create employer"}), 400
+    return jsonify({"message": "Employer account created", "employer": employer.get_json()}), 201
 
-    try:
-        if employer is None:
-            return jsonify({"error": "Failed to create employer"}), 400
-        return jsonify({"message": "Employer account created", "employer_id": employer.id}), 201
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
 
 @employer_views.route('/api/employer/<employer_id>/positions', methods=['GET'])
 @jwt_required()

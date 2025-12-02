@@ -12,24 +12,29 @@ from App.controllers import (
     get_applications_by_position,
     view_positions
 )
+from App.models.position import Position
 
 staff_views = Blueprint('staff_views', __name__, template_folder='../templates')
 
 @staff_views.route('/api/staff', methods=['POST'])
 def create_staff_endpoint():
-    data = request.json
+
+    data = request.get_json()
+    username = data.get("username", "").strip()
+    password = data.get("password", "").strip()
+    email = data.get("email", "").strip()
+
+    if not username or not password or not email:
+        return jsonify({"error": "username, password, and email are required"}), 400
 
     if get_user_by_username(data['username']):
         return jsonify({"error": "username already taken"}), 400
     
-    staff = create_staff(username=data['username'], password=data['password'], email=data['email'])
+    staff = create_staff(username, password, email)
+    if staff is None:
+        return jsonify({"error": "Failed to create staff"}), 400
+    return jsonify({"message": "Staff account created", "staff": staff.get_json()}), 201
 
-    try:
-        if staff is None:
-            return jsonify({"error": "Failed to create staff"}), 400
-        return jsonify({"message": "Staff account created", "staff_id": staff.id}), 201
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
     
 @staff_views.route('/api/staff/<staff_id>/students', methods=['GET'])
 @jwt_required()
@@ -101,12 +106,16 @@ def get_shortlist_by_position(staff_id, position_id):
         int_staff_id = int(staff_id)
         int_position_id = int(position_id)
     except ValueError:
-        return jsonify({"error": "Invalid ID format"}), 400
+        return jsonify({"error": "Invalid staff ID format"}), 400
 
     #check if the staff exists
     staff = Staff.query.get(int_staff_id)
     if not staff:
         return jsonify({"error": "Staff not found"}), 404
+
+    position = Position.query.get(int_position_id)
+    if not position:
+        return jsonify({"error": f"Position does not exist."}), 404
 
     try:
         shortlists = get_shortlist_by_position_staff(int_position_id, int_staff_id)
@@ -164,6 +173,10 @@ def get_applications_by_position(staff_id, position_id):
     staff = Staff.query.get(int_staff_id)
     if not staff:
         return jsonify({"error": "Staff not found"}), 404
+    
+    position = Position.query.get(int_position_id)
+    if not position:
+        return jsonify({"error": f"Position does not exist."}), 404
 
     try:
         applications = get_applications_by_position(int_staff_id, int_position_id)
