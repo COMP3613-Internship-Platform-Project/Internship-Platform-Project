@@ -27,7 +27,7 @@ def login_user():
         user_type=user_type
     ), 200
 
-@auth_views.route('/identify', methods=['GET'])
+@auth_views.route('/api/identify', methods=['GET'])
 @jwt_required()
 def identify():
     try:

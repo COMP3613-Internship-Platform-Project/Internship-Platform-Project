@@ -16,24 +16,25 @@ student_views = Blueprint('student_views', __name__, template_folder='../templat
 
 @student_views.route('/api/student', methods=['POST'])
 def create_student_endpoint():
-    data = request.json
+    data = request.get_json()
+    username = data.get("username", "").strip()
+    password = data.get("password", "").strip()
+    email = data.get("email", "").strip()
+    skills = data.get("skills", [])
 
-    if get_user_by_username(data['username']):
-        return jsonify({"error": "username already taken"}), 400
+    if not username or not password or not email or not skills:
+        return jsonify({"error": "username, password, email, and skills are required"}), 400
     
-    student = create_student(
-        username=data['username'],
-        password=data['password'],
-        email=data['email'],
-        skills=data['skills']
-    )
+    if get_user_by_username(data['username']):
+        return jsonify({"error": "Username already taken"}), 400
+    
+    if not isinstance(skills, list):
+        return jsonify({"error": "skills must be a list"}), 400
 
-    try:
-        if student is None:
-            return jsonify({"error": "Failed to create student"}), 400
-        return jsonify({"message": "Student account created", "student_id": student.id}), 201
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+    student = create_student(username, password, email, skills)
+    if student is None:
+        return jsonify({"error": "Failed to create student"}), 400
+    return jsonify({"message": "Student account created", "student": student.get_json()}), 201
 
 @student_views.route('/api/student/<student_id>/positions', methods=['GET'])
 @jwt_required()

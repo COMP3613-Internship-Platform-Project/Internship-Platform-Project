@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import get_jwt_identity, jwt_required, current_user
-from App.controllers import create_position, close_position, reopen_position, list_positions_by_employer
+from App.controllers import create_position, close_position, reopen_position, is_employer
 from App.models import Position
 
 position_views = Blueprint('position_views', __name__, template_folder='../templates')
@@ -10,16 +10,21 @@ position_views = Blueprint('position_views', __name__, template_folder='../templ
 @jwt_required()
 def create_position_route():
     authenticated_employer_id = get_jwt_identity()
-    if not authenticated_employer_id:
+
+    if not is_employer(authenticated_employer_id):
         return jsonify({"error": "Access Denied - Employer authorization required"}), 401
     
     data = request.json
+    
     try:
         employer_id = authenticated_employer_id
-        title=data['title']
-        number_of_positions=int(data['number'])
-    except KeyError as e:
+        title = data['title']
+        number_of_positions = int(data['number'])
+        if not title or not data['number']:
+            raise ValueError
+    except (KeyError, ValueError):
         return jsonify({"error": "title and number of positions are required"}), 400
+
 
     duplicate_position = Position.query.filter_by(employer_id=employer_id, title=title).first()
     if duplicate_position:
@@ -39,7 +44,7 @@ def create_position_route():
 @jwt_required()
 def close_position_route(position_id):
     authenticated_employer_id = get_jwt_identity()
-    if not authenticated_employer_id:
+    if not is_employer(authenticated_employer_id):
         return jsonify({"error": "Access Denied - Employer authorization required"}), 401
     
     position = Position.query.filter_by(id=position_id, employer_id=authenticated_employer_id).first()
@@ -59,7 +64,7 @@ def close_position_route(position_id):
 @jwt_required()
 def reopen_position_route(position_id):
     authenticated_employer_id = get_jwt_identity()
-    if not authenticated_employer_id:
+    if not is_employer(authenticated_employer_id):
         return jsonify({"error": "Access Denied - Employer authorization required"}), 401
     
     position = Position.query.filter_by(id=position_id, employer_id=authenticated_employer_id).first()
