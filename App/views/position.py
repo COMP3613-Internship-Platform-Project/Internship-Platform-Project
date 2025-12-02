@@ -20,10 +20,11 @@ def create_position_route():
         employer_id = authenticated_employer_id
         title = data['title']
         number_of_positions = int(data['number'])
-        if not title or not data['number']:
+        skills = data['skills']
+        if not title or not data['number'] or not isinstance(skills, list):
             raise ValueError
     except (KeyError, ValueError):
-        return jsonify({"error": "title and number of positions are required"}), 400
+        return jsonify({"error": "title, number of positions and skills are required"}), 400
 
 
     duplicate_position = Position.query.filter_by(employer_id=employer_id, title=title).first()
@@ -31,7 +32,7 @@ def create_position_route():
         return jsonify({"error": "Duplicate Position: You cannot create an internship position with the same title"}), 500
     
     try:
-        position = create_position(employer_id, title, number_of_positions)
+        position = create_position(employer_id, title, number_of_positions, skills)
     except:
         return jsonify({"error": "Failed to create position"}), 400
     

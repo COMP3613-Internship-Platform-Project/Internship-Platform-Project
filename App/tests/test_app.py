@@ -202,34 +202,34 @@ class UserIntegrationTests(unittest.TestCase):
 
     def test_create_position(self):
         employer = create_employer("Google", "googlepass","google@mail.com")
-        position = create_position(employer.id, "Software Intern", 5)
+        position = create_position(employer.id, "Software Intern", 5, ["Python", "C++"])
         assert position != None
         assert position.status == "Open"
 
     def test_close_position(self):
         employer = create_employer("Amazon", "amazonpass","amazon@mail.com")
-        position = create_position(employer.id, "Data Analyst Intern", 3)
+        position = create_position(employer.id, "Data Analyst Intern", 3, ["R", "SQL"])
         close_position(position.id, employer.id)
         assert position.status == "Closed"
 
     def test_close_position_unauthorized(self): #add to doc 
         employer1 = create_employer("Amazon", "amazonpass","amazon@mail.com")
         employer2 = create_employer("eBay", "ebaypass","ebay@mail.com")
-        position = create_position(employer1.id, "Data Analyst Intern", 3)
+        position = create_position(employer1.id, "Data Analyst Intern", 3, ["R", "SQL"])
         result = close_position(position.id, employer2.id)
         assert result == f"Employer with ID {employer2.id} is not authorized to close this position."
 
     def test_close_already_closed_position(self): #add to doc
         employer = create_employer("Amazon", "amazonpass","amazon@mail.com")
-        position = create_position(employer.id, "Data Analyst Intern", 3)
+        position = create_position(employer.id, "Data Analyst Intern", 3, ["R", "SQL"])
         close_position(position.id, employer.id)
         result = close_position(position.id, employer.id)
         assert result == f"Position with ID {position.id} has been closed."
 
     def test_view_all_positions(self):
         employer = create_employer("Facebook", "facebookpass","facebook@mail.com")
-        position1 = create_position(employer.id, "Web Developer Intern", 4)
-        position2 = create_position(employer.id, "App Developer Intern", 2)
+        position1 = create_position(employer.id, "Web Developer Intern", 4, ["HTML", "CSS"])
+        position2 = create_position(employer.id, "App Developer Intern", 2, ["Java", "Kotlin"])
         positions = list_positions_by_employer(employer.id)
         self.assertIn(position1.toJSON(), positions)
         self.assertIn(position2.toJSON(), positions)
@@ -239,14 +239,14 @@ class UserIntegrationTests(unittest.TestCase):
 
     def test_create_application(self):
         employer = create_employer("Airbnb", "airbnbpass","airbnb@mail.com")
-        position = create_position(employer.id, "Hospitality Intern", 4)
+        position = create_position(employer.id, "Hospitality Intern", 4, ["Customer Service", "Communication"])
         student = create_student("alice", "alicepass","alice@mail.com", ["JavaScript", "React"])
         application = create_application(student.id, position.id)
         assert application != None
 
     def test_create_application_position_closed(self): #add to doc 
         employer = create_employer("Airbnb", "airbnbpass","airbnb@mail.com")
-        position = create_position(employer.id, "Web developer Intern", 4)
+        position = create_position(employer.id, "Web developer Intern", 4, ["HTML", "CSS"])
         student = create_student("alice", "alicepass","alice@mail.com", ["JavaScript", "React"])
         message = close_position(position.id, employer.id)
         result = create_application(student.id, position.id)
@@ -260,7 +260,7 @@ class UserIntegrationTests(unittest.TestCase):
     def test_view_all_applications(self):
         employer = create_employer("Tesla", "teslapass","tesla@mail.com")
         staff = create_staff("trudy", "trudypass","trudy@mail.com")
-        position = create_position(employer.id, "Engineering Intern", 3)
+        position = create_position(employer.id, "Engineering Intern", 3, ["Mechanical", "Electrical"])
         student1 = create_student("bob", "bobpass","bob@mail.com", ["Python", "Django"])
         student2 = create_student("carol", "carolpass","carol@mail.com", ["Java", "Spring"])
         application1 = create_application(student1.id, position.id)
@@ -289,8 +289,8 @@ class UserIntegrationTests(unittest.TestCase):
 
     def test_get_applications_by_position(self):
         employer = create_employer("LinkedIn", "linkedinpass","linkedin@mail.com")
-        position = create_position(employer.id, "Marketing Intern", 2)
-        position2 = create_position(employer.id, "Sales Intern", 2)
+        position = create_position(employer.id, "Marketing Intern", 2, ["SEO", "Content Creation"])
+        position2 = create_position(employer.id, "Sales Intern", 2, ["Communication", "Negotiation"])
         staff = create_staff("trudy", "trudypass","trudy@mail.com")
         student = create_student("dave", "davepass","dave@mail.com", ["Marketing", "SEO"])
         application = create_application(student.id, position.id)
@@ -320,7 +320,7 @@ class UserIntegrationTests(unittest.TestCase):
 
     def test_get_applications_by_student(self):
         employer = create_employer("Adobe", "adobepass","adobe@mail.com")
-        position = create_position(employer.id, "Design Intern", 2)
+        position = create_position(employer.id, "Design Intern", 2, ["Design", "Creativity"])
         student = create_student("eva", "evapass","eva@mail.com", ["Design", "Photoshop"])
         student2 = create_student("frank", "frankpass","frank@mail.com", ["Design", "Illustrator"])
         application = create_application(student.id, position.id)
@@ -349,7 +349,7 @@ class UserIntegrationTests(unittest.TestCase):
 
     def test_get_application_by_student_and_position(self):
         employer = create_employer("Intel", "intelpass","intel@mail.com")
-        position = create_position(employer.id, "Hardware Intern", 2)
+        position = create_position(employer.id, "Hardware Intern", 2, ["C", "C++"])
         student = create_student("gina", "ginapass","gina@mail.com", ["C", "C++"])
         application = create_application(student.id, position.id)
         retrieved_application = get_application_by_student_and_position(student.id, position.id)
@@ -368,14 +368,14 @@ class UserIntegrationTests(unittest.TestCase):
 
     def test_create_shortlist(self):
         employer = create_employer("Netflix", "netflixpass","netflix@mail.com")
-        position = create_position(employer.id, "Content Intern", 2)
+        position = create_position(employer.id, "Content Intern", 2, ["Creativity", "Editing"])
         staff = create_staff("trudy", "trudypass","trudy@mail.com")
         shortlist = create_shortlist(position.id, staff.id)
         assert shortlist != None
 
     def test_create_duplicate_shortlist(self): #add to doc
         employer = create_employer("Netflix", "netflixpass","netflix@mail.com")
-        position = create_position(employer.id, "Content Intern", 2)
+        position = create_position(employer.id, "Content Intern", 2, ["Creativity", "Editing"])
         staff = create_staff("trudy", "trudypass","trudy@mail.com")
         shortlist1 = create_shortlist(position.id, staff.id)
         shortlist2 = create_shortlist(position.id, staff.id)
@@ -383,19 +383,29 @@ class UserIntegrationTests(unittest.TestCase):
 
     def test_add_application_to_shortlist(self):
         employer = create_employer("Uber", "uberpass","uber@mail.com")
-        position = create_position(employer.id, "Logistics Intern", 3)
+        position = create_position(employer.id, "Logistics Intern", 3, ["Logistics", "Management"])
         staff = create_staff("trudy", "trudypass","trudy@mail.com")
-        student = create_student("john", "johnpass","john@mail.com", ["HTML", "CSS"])
+        student = create_student("john", "johnpass","john@mail.com", ["HTML", "Logistics"])
         application = create_application(student.id, position.id)
         shortlist = create_shortlist(position.id, staff.id)
         added_shortlist = add_application_to_shortlist(application.id, shortlist.id)
         assert added_shortlist != None
 
+    def test_add_application_to_shortlist_skills(self): #add to doc
+        employer = create_employer("Uber", "uberpass", "uber@mail.com")
+        position = create_position(employer.id, "Logistics Intern", 3, ["Logistics", "Management"])
+        staff = create_staff("trudy", "trudypass", "trudy@mail.com")
+        student = create_student("john", "johnpass", "john@mail.com", ["HTML", "Design"])  # Student lacks required skills
+        application = create_application(student.id, position.id)
+        shortlist = create_shortlist(position.id, staff.id)
+        result = add_application_to_shortlist(staff.id, application.id)
+        assert result == f"Student with ID {student.id} does not have the required skills for Position ID {position.id}."
+
     def test_add_application_to_shortlist_twice(self): #add to doc
         employer = create_employer("Uber", "uberpass","uber@mail.com")
-        position = create_position(employer.id, "Logistics Intern", 3)
+        position = create_position(employer.id, "Logistics Intern", 3, ["Logistics", "Management"])
         staff = create_staff("trudy", "trudypass","trudy@mail.com")
-        student = create_student("john", "johnpass","john@mail.com", ["HTML", "CSS"])
+        student = create_student("john", "johnpass","john@mail.com", ["HTML", "Logistics"])
         application = create_application(student.id, position.id)
         shortlist = create_shortlist(position.id, staff.id)
         add_application_to_shortlist(staff.id, application.id)
@@ -404,7 +414,7 @@ class UserIntegrationTests(unittest.TestCase):
 
     def test_get_shortlist_by_position_staff(self):
         employer = create_employer("Google", "googlepass","google@mail.com")
-        position = create_position(employer.id, "Software Intern", 5)
+        position = create_position(employer.id, "Software Intern", 5, ["Python", "C++"])
         staff = create_staff("trudy", "trudypass","trudy@mail.com")
         shortlist = create_shortlist(position.id, staff.id)
         shortlist_data = get_shortlist_by_position_staff(position.id, staff.id)
@@ -419,7 +429,7 @@ class UserIntegrationTests(unittest.TestCase):
         
     def test_get_shortlist_by_position_employer(self):
         employer = create_employer("Google", "googlepass","google@mail.com")
-        position = create_position(employer.id, "Software Intern", 5)
+        position = create_position(employer.id, "Software Intern", 5, ["Python", "C++"])
         staff = create_staff("trudy", "trudypass","trudy@mail.com")
         shortlist = create_shortlist(position.id, staff.id)
         shortlist_data = get_shortlist_by_position_employer(position.id, employer.id)
@@ -434,8 +444,8 @@ class UserIntegrationTests(unittest.TestCase):
     
     def test_get_all_shortlists_by_employer(self):
         employer = create_employer("Netflix", "netflixpass","netflix@mail.com")
-        position = create_position(employer.id, "Content Intern", 2)
-        position2 = create_position(employer.id, "Data Intern", 2)
+        position = create_position(employer.id, "Content Intern", 2, ["Creativity", "Editing"])
+        position2 = create_position(employer.id, "Data Intern", 2, ["Python", "SQL"])
         staff = create_staff("trudy", "trudypass","trudy@mail.com")
         shortlist = create_shortlist(position.id, staff.id)
         shortlist2 = create_shortlist(position2.id, staff.id)
@@ -457,7 +467,7 @@ class UserIntegrationTests(unittest.TestCase):
 
     def test_view_all_shortlists(self):
         employer = create_employer("Spotify", "spotifypass","spotify@mail.com")
-        position = create_position(employer.id, "Music Intern", 3)
+        position = create_position(employer.id, "Music Intern", 3, ["Music Theory", "Audio Editing"])
         staff = create_staff("trudy", "trudypass","trudy@mail.com")
         shortlist = create_shortlist(position.id, staff.id)
         shortlists = get_all_shortlists(staff.id)
@@ -471,7 +481,7 @@ class UserIntegrationTests(unittest.TestCase):
 
     def test_view_all_shortlists_unauthorized(self): #add to doc 
         employer = create_employer("Spotify", "spotifypass","spotify@mail.com")
-        position = create_position(employer.id, "Music Intern", 3)
+        position = create_position(employer.id, "Music Intern", 3, ["Music Theory", "Audio Editing"])
         staff = create_staff("trudy", "trudypass","trudy@mail.com")
         shortlist = create_shortlist(position.id, staff.id)
         student = create_student("harry", "harrypass","harry@mail.com", ["C#", "HTML"])
@@ -482,8 +492,8 @@ class UserIntegrationTests(unittest.TestCase):
         # Create a student and two open positions
         student = create_student("openpos", "openpass", "openpos@mail.com", ["Python"])
         employer = create_employer("OpenInc", "openpass", "openinc@mail.com")
-        position1 = create_position(employer.id, "Backend Intern", 2)
-        position2 = create_position(employer.id, "Frontend Intern", 1)
+        position1 = create_position(employer.id, "Backend Intern", 2, ["Python", "Django"])
+        position2 = create_position(employer.id, "Frontend Intern", 1, ["JavaScript", "React"])
         # Should return both positions
         positions = view_open_positions_by_student(student.id)
         self.assertIn(position1.toJSON(), positions)
@@ -491,7 +501,7 @@ class UserIntegrationTests(unittest.TestCase):
 
     def test_view_my_shortlisted_applications(self):
         employer = create_employer("Adobe", "adobepass","adobe@mail.com")
-        position = create_position(employer.id, "Design Intern", 2)
+        position = create_position(employer.id, "Design Intern", 2, ["Design", "Creativity"])
         staff = create_staff("trudy", "trudypass","trudy@mail.com")
         student = create_student("eva", "evapass","eva@mail.com", ["Design", "Photoshop"])
         application = create_application(student.id, position.id)
@@ -511,9 +521,9 @@ class UserIntegrationTests(unittest.TestCase):
 
     def test_accept_student(self):
         employer = create_employer("Airbnb", "airbnbpass","airbnb@mail.com")
-        position = create_position(employer.id, "Hospitality Intern", 4)
+        position = create_position(employer.id, "Hospitality Intern", 4, ["Customer Service", "Communication"])
         staff = create_staff("trudy", "trudypass","trudy@mail.com")
-        student = create_student("alice", "alicepass","alice@mail.com", ["Java", "React"])
+        student = create_student("alice", "alicepass","alice@mail.com", ["Java", "Communication"])
         application = create_application(student.id, position.id)
         shortlist = create_shortlist(position.id, staff.id)
         add_application_to_shortlist(staff.id, application.id)
@@ -523,9 +533,9 @@ class UserIntegrationTests(unittest.TestCase):
 
     def test_student_reject_position(self):
         employer = create_employer("Airbnb", "airbnbpass", "airbnb@mail.com")
-        position = create_position(employer.id, "Hospitality Intern", 4)
+        position = create_position(employer.id, "Hospitality Intern", 4, ["Customer Service", "Communication"])
         staff = create_staff("trudy", "trudypass", "trudy@mail.com")
-        student = create_student("alice", "alicepass", "alice@mail.com", ["Java", "React"])
+        student = create_student("alice", "alicepass", "alice@mail.com", ["Java", "Communication"])
         application = create_application(student.id, position.id)
         shortlist = create_shortlist(position.id, staff.id)
         add_application_to_shortlist(staff.id, application.id)
@@ -541,9 +551,9 @@ class UserIntegrationTests(unittest.TestCase):
 
     def test_reject_student(self):
         employer = create_employer("Airbnb", "airbnbpass","airbnb@mail.com")
-        position = create_position(employer.id, "Hospitality Intern", 4)
+        position = create_position(employer.id, "Hospitality Intern", 4, ["Customer Service", "Communication"])
         staff = create_staff("trudy", "trudypass","trudy@mail.com")
-        student = create_student("alice", "alicepass","alice@mail.com", ["Java", "React"])
+        student = create_student("alice", "alicepass","alice@mail.com", ["Customer Service", "React"])
         application = create_application(student.id, position.id)
         shortlist = create_shortlist(position.id, staff.id)
         add_application_to_shortlist(staff.id, application.id)
@@ -553,7 +563,7 @@ class UserIntegrationTests(unittest.TestCase):
     def test_reject_unauthoried_employer(self): #add to doc
         employer1 = create_employer("Airbnb", "airbnbpass","airbnb@mail.com")
         employer2 = create_employer("VRBO", "vrbopass","vrbo@mail.com")
-        position = create_position(employer1.id, "AI Intern", 4)
+        position = create_position(employer1.id, "AI Intern", 4, ["Machine Learning", "Data Science"])
         staff = create_staff("trudy", "trudypass","trudy@mail.com")
         student = create_student("alice", "alicepass","alice@mail.com", ["Java", "React"])
         application = create_application(student.id, position.id)

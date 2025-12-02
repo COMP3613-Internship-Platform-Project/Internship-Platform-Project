@@ -1,6 +1,7 @@
 from App.database import db
 from App.models.position_states import OpenState, ClosedState
 from sqlalchemy.orm import reconstructor
+from sqlalchemy import JSON
 
 class Position(db.Model):
     __tablename__ = 'position'
@@ -10,14 +11,16 @@ class Position(db.Model):
     status = db.Column(db.String(50), nullable=False, default="Open") #implement state design pattern 
     state=None #state object to handle state-specific behavior
     employer_id = db.Column(db.Integer, db.ForeignKey('employer.id'), nullable=False)
+    skills = db.Column(JSON, nullable=False)
     
     employer = db.relationship("Employer", back_populates="positions")
 
-    def __init__(self, title, employer_id, number):
+    def __init__(self, title, employer_id, number, skills):
         self.title = title
         self.employer_id = employer_id
         self.state = OpenState() #initial state
         self.number_of_positions = number
+        self.skills = skills
     
     @reconstructor
     def init_on_load(self):
@@ -35,7 +38,8 @@ class Position(db.Model):
             "title": self.title,
             "number_of_positions": self.number_of_positions,
             "status": self.status,
-            "employer_id": self.employer_id
+            "employer_id": self.employer_id,
+            "skills": self.skills
         }
     
     def set_State(self, state):
