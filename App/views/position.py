@@ -44,7 +44,7 @@ def create_position_route():
 @jwt_required()
 def close_position_route(position_id):
     authenticated_employer_id = get_jwt_identity()
-    if not authenticated_employer_id:
+    if not is_employer(authenticated_employer_id):
         return jsonify({"error": "Access Denied - Employer authorization required"}), 401
     
     position = Position.query.filter_by(id=position_id, employer_id=authenticated_employer_id).first()
@@ -64,7 +64,7 @@ def close_position_route(position_id):
 @jwt_required()
 def reopen_position_route(position_id):
     authenticated_employer_id = get_jwt_identity()
-    if not authenticated_employer_id:
+    if not is_employer(authenticated_employer_id):
         return jsonify({"error": "Access Denied - Employer authorization required"}), 401
     
     position = Position.query.filter_by(id=position_id, employer_id=authenticated_employer_id).first()
