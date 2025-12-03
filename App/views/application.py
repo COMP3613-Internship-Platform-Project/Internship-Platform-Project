@@ -17,7 +17,7 @@ def create_application_endpoint():
 
     existing = get_application_by_student_and_position(authenticated_student_id, data['position_id'])
     if isinstance(existing, dict):
-        return jsonify({"error": "Application for this position by the student already exists"}), 400
+        return jsonify({"error": "Application for this position by the student already exists"}), 409
     application = create_application(authenticated_student_id, position_id=data['position_id'])
 
     try:

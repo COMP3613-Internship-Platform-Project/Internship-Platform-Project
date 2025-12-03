@@ -27,7 +27,7 @@ def create_employer_endpoint():
         return jsonify({"error": "username, password, and email are required"}), 400
 
     if get_user_by_username(data['username']):
-        return jsonify({"error": "Username already taken"}), 400
+        return jsonify({"error": "Username already taken"}), 409
     
     employer = create_employer(username, password, email)
     if employer is None:

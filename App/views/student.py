@@ -27,7 +27,7 @@ def create_student_endpoint():
         return jsonify({"error": "username, password, email, and skills are required"}), 400
     
     if get_user_by_username(data['username']):
-        return jsonify({"error": "Username already taken"}), 400
+        return jsonify({"error": "Username already taken"}), 409
     
     if not isinstance(skills, list):
         return jsonify({"error": "skills must be a list"}), 400

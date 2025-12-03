@@ -28,7 +28,7 @@ def create_staff_endpoint():
         return jsonify({"error": "username, password, and email are required"}), 400
 
     if get_user_by_username(data['username']):
-        return jsonify({"error": "username already taken"}), 400
+        return jsonify({"error": "username already taken"}), 409
     
     staff = create_staff(username, password, email)
     if staff is None:
