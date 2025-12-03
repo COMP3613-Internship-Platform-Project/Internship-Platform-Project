@@ -29,10 +29,10 @@ def close_position(position_id: int, employer_id: int): #Marishel - added employ
     if not position:
         return f"Position with ID {position_id} does not exist."    
     
-    if position.employer_id != employer_id:
+    if int(position.employer_id) != int(employer_id):
         return f"Employer with ID {employer_id} is not authorized to close this position."
     
-    if position.status == "closed":
+    if position.status == "Closed":
         return f"Position with ID {position_id} is already closed."
     else:
         position.close_position()
@@ -42,9 +42,11 @@ def reopen_position(position_id: int, employer_id: int): #Marishel
     position = db.session.get(Position, position_id)
     if not position:
         return f"Position with ID {position_id} does not exist."    
-    if position.employer_id != employer_id:
+    
+    if int(position.employer_id) != int(employer_id):
         return f"Employer with ID {employer_id} is not authorized to close this position."
-    if position.status == "open":
+    
+    if position.status == "Open":
         return f"Position with ID {position_id} is already open."
     else:
         position.reopen_position()
