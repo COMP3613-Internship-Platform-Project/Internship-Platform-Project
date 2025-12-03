@@ -35,8 +35,12 @@ def test_full_cli_workflow(runner):
     assert 'created' in result.output or result.exit_code == 0
     student_id = extract_id(result.output)
     
-    # 5. Employer creates a position
-    result = runner.invoke(app.cli, ['employer', 'position', str(employer_id or 3), 'Software Intern', '3', 'Python, C++'])
+    # 5. Employer creates a position (CLI now prompts for skills interactively)
+    result = runner.invoke(
+        app.cli,
+        ['employer', 'position', str(employer_id or 3), 'Software Intern', '3'],
+        input='Python, C++\n'
+    )
     print(result.output)
     assert 'created' in result.output or result.exit_code == 0
     position_id = extract_id(result.output)
