@@ -29,7 +29,7 @@ def create_position_route():
 
     duplicate_position = Position.query.filter_by(employer_id=employer_id, title=title).first()
     if duplicate_position:
-        return jsonify({"error": "Duplicate Position: You cannot create an internship position with the same title"}), 500
+        return jsonify({"error": "Duplicate Position: You cannot create an internship position with the same title"}), 409
     
     try:
         position = create_position(employer_id, title, number_of_positions, skills)

@@ -23,7 +23,7 @@ def create_shortlist_route():
     
     duplicate = Shortlist.query.filter_by(position_id=position_id).first()
     if duplicate:
-        return jsonify({"error": "A shortlist for this position already exists"}), 400
+        return jsonify({"error": "A shortlist for this position already exists"}), 409
     
     try:
         new_shortlist = create_shortlist(position_id, authenticated_staff_id)
