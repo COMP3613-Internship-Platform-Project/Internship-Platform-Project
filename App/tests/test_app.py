@@ -31,7 +31,7 @@ from App.controllers import (
     get_all_shortlists,
     get_shortlist_by_position_staff, 
     get_all_applications, 
-    get_applications_by_position, 
+    get_all_applications_by_position, 
     get_applications_by_student,
     get_application_by_student_and_position,
     get_shortlist_by_position_employer, 
@@ -295,7 +295,7 @@ class UserIntegrationTests(unittest.TestCase):
         student = create_student("dave", "davepass","dave@mail.com", ["Marketing", "SEO"])
         application = create_application(student.id, position.id)
         application2 = create_application(student.id, position2.id) # application for second position
-        applications = get_applications_by_position(staff.id, position.id) #shows only applications for first position
+        applications = get_all_applications_by_position(staff.id, position.id) #shows only applications for first position
         expected_application = {
             "application_id": application.id,
             "employer_name": employer.username,

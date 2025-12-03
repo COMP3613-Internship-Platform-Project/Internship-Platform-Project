@@ -9,7 +9,7 @@ from App.controllers import (
     get_all_shortlists,
     get_shortlist_by_position_staff,
     get_all_applications,
-    get_applications_by_position,
+    get_all_applications_by_position,
     view_positions
 )
 from App.models.position import Position
@@ -179,7 +179,7 @@ def get_applications_by_position(staff_id, position_id):
         return jsonify({"error": f"Position does not exist."}), 404
 
     try:
-        applications = get_applications_by_position(int_staff_id, int_position_id)
+        applications = get_all_applications_by_position(int_staff_id, int_position_id)
         if applications is None:
             return jsonify({"error": "No applications found for this position"}), 404
         return jsonify(applications), 200
