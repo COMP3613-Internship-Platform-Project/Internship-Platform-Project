@@ -103,12 +103,14 @@ def test_full_cli_workflow(runner):
     assert result.exit_code == 0
     
     # 18. Employer accepts student
-    result = runner.invoke(app.cli, ['employer', 'accept', str(employer_id or 3), str(position_id or 1), str(student_id or 5)])
+    application_id = "1"  
+    result = runner.invoke(app.cli, ['employer', 'accept', application_id, str(employer_id or 3)])
     print(result.output)
     assert result.exit_code == 0
     
     # 19. Employer rejects student
-    result = runner.invoke(app.cli, ['employer', 'reject', str(employer_id or 3), str(position_id or 1), str(student_id or 5)])
+    application_id = "2"  
+    result = runner.invoke(app.cli, ['employer', 'reject', application_id, str(employer_id or 3)])
     print(result.output)
     assert result.exit_code == 0
     

@@ -37,8 +37,8 @@ from App.controllers import (
     get_shortlist_by_position_employer, 
     get_all_shortlists_by_employer, 
     view_my_shortlisted_applications, 
-    accept_student, 
-    reject_student
+    accept_application, 
+    reject_application
 )
 
 
@@ -519,7 +519,7 @@ class UserIntegrationTests(unittest.TestCase):
         }
         self.assertIn(expected_application, shortlisted_applications)
 
-    def test_accept_student(self):
+    def test_accept_application(self):
         employer = create_employer("Airbnb", "airbnbpass","airbnb@mail.com")
         position = create_position(employer.id, "Hospitality Intern", 4, ["Customer Service", "Communication"])
         staff = create_staff("trudy", "trudypass","trudy@mail.com")
@@ -527,7 +527,7 @@ class UserIntegrationTests(unittest.TestCase):
         application = create_application(student.id, position.id)
         shortlist = create_shortlist(position.id, staff.id)
         add_application_to_shortlist(staff.id, application.id)
-        accept_student(employer.id, position.id, student.id)
+        accept_application(application.id, employer.id)
         self.assertEqual(application.state_value, "Accepted")
     
 
@@ -539,7 +539,7 @@ class UserIntegrationTests(unittest.TestCase):
         application = create_application(student.id, position.id)
         shortlist = create_shortlist(position.id, staff.id)
         add_application_to_shortlist(staff.id, application.id)
-        accept_student(employer.id, position.id, student.id)
+        accept_application(application.id, employer.id)
         self.assertEqual(application.state_value, "Accepted")
 
         #rejecting position in accepted state
@@ -549,7 +549,7 @@ class UserIntegrationTests(unittest.TestCase):
         result2 = student_reject_position(student.id, position.id)
         self.assertIn("Application is not in an accepted state", result2)
 
-    def test_reject_student(self):
+    def test_reject_application(self):
         employer = create_employer("Airbnb", "airbnbpass","airbnb@mail.com")
         position = create_position(employer.id, "Hospitality Intern", 4, ["Customer Service", "Communication"])
         staff = create_staff("trudy", "trudypass","trudy@mail.com")
@@ -557,10 +557,10 @@ class UserIntegrationTests(unittest.TestCase):
         application = create_application(student.id, position.id)
         shortlist = create_shortlist(position.id, staff.id)
         add_application_to_shortlist(staff.id, application.id)
-        reject_student(employer.id, position.id, student.id)
+        reject_application(application.id, employer.id)
         self.assertEqual(application.state_value, "Rejected")
 
-    def test_reject_unauthoried_employer(self): #add to doc
+    def test_reject_unauthorized_employer(self): #add to doc
         employer1 = create_employer("Airbnb", "airbnbpass","airbnb@mail.com")
         employer2 = create_employer("VRBO", "vrbopass","vrbo@mail.com")
         position = create_position(employer1.id, "AI Intern", 4, ["Machine Learning", "Data Science"])
@@ -569,6 +569,6 @@ class UserIntegrationTests(unittest.TestCase):
         application = create_application(student.id, position.id)
         shortlist = create_shortlist(position.id, staff.id)
         add_application_to_shortlist(staff.id, application.id)
-        result = reject_student(employer2.id, position.id, student.id)
+        result = reject_application(application.id, employer2.id)
         assert result == f"Employer with ID {employer2.id} is not authorized to reject students for this position."
 
