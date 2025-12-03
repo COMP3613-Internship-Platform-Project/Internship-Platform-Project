@@ -33,7 +33,6 @@ def add_application_to_shortlist_endpoint(application_id):
     if not is_staff(authenticated_staff_id):
         return jsonify({"error": "Staff authentication required"}), 401
     
-#staff id shouldn't be necessary but waiting for confirmation
     application = add_application_to_shortlist(staff_id=authenticated_staff_id, application_id=application_id)
     try:
         if application is None:
