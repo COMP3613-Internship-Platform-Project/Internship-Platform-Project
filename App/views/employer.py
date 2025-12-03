@@ -155,7 +155,7 @@ def accept_student_endpoint(position_id, student_id):
             return jsonify({"error": result}), 400
         return jsonify({"message": result}), 200
 
-@employer_views.route('/api/positions/<position_id>/reject/<student_id>', methods=['POST'])
+@employer_views.route('/api/positions/<position_id>/reject/<student_id>', methods=['PUT'])
 @jwt_required()
 def reject_student_endpoint(position_id, student_id):
     employer_id = get_jwt_identity()
