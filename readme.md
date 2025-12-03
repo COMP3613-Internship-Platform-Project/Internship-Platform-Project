@@ -3,8 +3,15 @@
 ### The following is built for an application that is meant to take student users applying to internship positions made by employers, the applications are reviewed by university staff members who will place the applications on a shortlist for the employers to review and accept accordingly.
 
 ## Requirements 
-The aplication utilises a restful API through the Postman application to be run.
+The aplication utilises a restful API through the Postman application to be run.  
+The following can be used to run the Postman API through the CLI
+```bash
+npm install -g newman
 
+newman run "postman/Deployed/Internship Platform Project Collection.postman_collection.json" -e "postman/Deployed/Internship Platform Project Environment.postman_environment.json"  
+
+newman run "postman/Local/(Local) Internship Platform Project.postman_collection.json" -e "postman/Local/(Local) Internship Platform Project postman_environment.json"  
+ ```
 # Collaborators
 - ### Franchesca James
 - ### Marishel Lochan
@@ -31,49 +38,72 @@ flask init
 ---
 
 ## Common Usage Scenarios
+This is a list of the general workflow for the application, for full command details scroll past until you reach the section of commands you wish to look at.
 
-### Scenario 1: Post a Position and Hire a Student
+### Scenario 1: Employer creates position and student applies, is accepted but decides later he doesn't want that position
 
 ```bash
-# 1. Create a position as employer
-flask employer position 3 "Backend Developer Intern" 2 "['Python', 'Django']"
+# 1. Create a position as employer, you will be prompted to enter skills
+flask employer position 3 "Backend Developer Intern" 2
+Java, React
 
 # 2. Student applies
-flask student apply 5 1
+flask student apply 5 3
 
 # 3. Staff reviews and shortlists
-flask staff shortlist-application 1 1
+flask staff shortlist-application 1 3
 
-# 4. Employer accepts
-flask employer accept 1 3
+# 4. Employer accepts application
+flask employer accept 3 3
+
 ```
 
-### Scenario 2: View Student's Progress
-
 ```bash
-# View all applications
+# 5. View all applications
 flask student get-all-applications 5
 
-# View specific application
-flask student get-position-application 5 1
+# 6. View specific application
+flask student get-position-application 5 3
 
-# View shortlists
-flask student get-shortlists 5
+# 7. Student decides that the position isn't for him
+flask student reject-position 5 3
+
 ```
-
-### Scenario 3: Staff Manages Applications
 
 ```bash
-# View all applications
+# 8. Staff views all applications
 flask staff applications 1
 
-# View applications for specific position
-flask staff applications-by-position 1 3
+# 9. Staff views applications for specific position
+flask staff applications 1
 
-# Shortlist promising candidates
-flask staff shortlist-application 1 5
 ```
+### Scenario 2: Student applies but employer rejects student
+```bash
+# 1. Staff looks at pre-existing application
+flask staff applications-by-position 1 2
 
+# 2. Staff shortlists the application
+flask staff shortlist-application 1 2
+
+# 2. Employer checks the shortlist for the position
+flask employer shortlists-by-position 2 4
+
+# 3. View shortlists
+flask student get-shortlists 6
+
+# 4. Employer rejects the application
+flask employer reject 2 4
+
+# 5. Student checks their shortlisted application
+flask student get-shortlists 6
+
+# 6. Anxious they check positions to see the result
+flask student get-position-application 6 2
+
+# 7. Student cries about getting rejected
+;-;
+```
 ---
 
 ## User Commands
