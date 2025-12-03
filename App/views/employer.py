@@ -6,8 +6,8 @@ from App.controllers import (
     get_user_by_username,
     create_employer,
     get_all_shortlists_by_employer,
-    accept_student,
-    reject_student,
+    accept_application,
+    reject_application,
     get_shortlist_by_position_employer, 
     list_positions_by_employer,
     get_jwt_identity
@@ -132,46 +132,41 @@ def view_position_shortlist(employer_id, position_id):
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-@employer_views.route('/api/positions/<position_id>/accept/<student_id>', methods=['PUT'])
+@employer_views.route('/api/accept/<application_id>', methods=['PUT'])
 @jwt_required()
-def accept_student_endpoint(position_id, student_id):
+def accept_application_endpoint(application_id):
     employer_id = get_jwt_identity()
-    
     if not is_employer(employer_id):
         return jsonify({"error": "Access denied - employer authorization required"}), 401
-    
-    #check for employer id format
+
     try:
-        int_position_id = int(position_id)
-        int_student_id = int(student_id)
         int_employer_id = int(employer_id)
-    except ValueError:
+        int_application_id = int(application_id)
+    except (ValueError, TypeError):
         return jsonify({"error": "Invalid ID format"}), 400
 
-    result = accept_student(int_employer_id, int_position_id, int_student_id)
+    result = accept_application(int_application_id, int_employer_id)
 
     if isinstance(result, str):
         if "has been accepted" not in result.lower():
             return jsonify({"error": result}), 400
         return jsonify({"message": result}), 200
 
-@employer_views.route('/api/positions/<position_id>/reject/<student_id>', methods=['PUT'])
+@employer_views.route('/api/reject/<application_id>', methods=['PUT'])
 @jwt_required()
-def reject_student_endpoint(position_id, student_id):
+def reject_application_endpoint(application_id):
     employer_id = get_jwt_identity()
 
     if not is_employer(employer_id):
         return jsonify({"error": "Access denied - employer authorization required"}), 401
 
-    #check for employer id format
     try:
-        int_position_id = int(position_id)
-        int_student_id = int(student_id)
         int_employer_id = int(employer_id)
-    except ValueError:
+        int_application_id = int(application_id)
+    except (ValueError, TypeError):
         return jsonify({"error": "Invalid ID format"}), 400
 
-    result = reject_student(int_employer_id, int_position_id, int_student_id)
+    result = reject_application(int_application_id, int_employer_id)
 
     if isinstance(result, str):
         if "has been rejected" not in result.lower():

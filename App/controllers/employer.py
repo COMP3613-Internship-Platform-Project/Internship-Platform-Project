@@ -120,29 +120,19 @@ def get_shortlist_by_position_employer(position_id: int, employer_id: int): #Mar
     except SQLAlchemyError as e:
         raise Exception(f"Error retrieving shortlists: {e}")
 
-def accept_student(employer_id: int, position_id: int, student_id: int):
+def accept_application(application_id: int, employer_id: int):
     try:
-        #ensure employer, position, student and shortlist exist and are related
-        employer: Employer | None = Employer.query.get(employer_id)
-        if not employer:
-            return f"Employer with ID {employer_id} does not exist."
-        
-        position: Position | None = Position.query.get(position_id)
-        if not position:
-            return f"Position with ID {position_id} does not exist."
-        
-        if position.employer_id != employer.id:
-            return f"Employer with ID {employer_id} is not authorized to accept students for this position."
-        
-        student: Student | None = Student.query.get(student_id)
-        if not student:
-            return f"Student with ID {student_id} does not exist."
-        
-        application: Application | None = Application.query.filter_by(position_id=position.id, student_id=student.id).first()
+        application = Application.query.get(application_id)
         if not application:
-            return f"Student with ID {student_id} did not apply for Position ID {position_id}."
-        
-        # Check if application is in Shortlisted state
+            return f"Application with ID {application_id} does not exist."
+
+        position = Position.query.get(application.position_id)
+        if not position:
+            return f"Position with ID {application.position_id} does not exist."
+
+        if position.employer_id != employer_id:
+            return f"Employer with ID {employer_id} is not authorized to accept students for this position."
+
         if application.state_value != "Shortlisted":
             return "Only shortlisted applications can be accepted."
 
@@ -151,46 +141,36 @@ def accept_student(employer_id: int, position_id: int, student_id: int):
             application.state.accept(application)
             db.session.add(application)
             db.session.commit()
-            return f"Application for Student ID {student_id} to Position ID {position_id} has been accepted."
+            return f"Application ID {application_id} has been accepted."
         except Exception as e:
             db.session.rollback()
-            return f"Error updating application status: {e}"        
+            return f"Error updating application status: {e}"
     except SQLAlchemyError as e:
         db.session.rollback()
         raise Exception(f"Error accepting student: {e}")
 
-def reject_student(employer_id: int, position_id: int, student_id: int):
+def reject_application(application_id: int, employer_id: int):
     try:
-        #ensure employer, position, student and shortlist exist and are related
-        employer: Employer | None = Employer.query.get(employer_id)
-        if not employer:
-            return f"Employer with ID {employer_id} does not exist."
-        
-        position: Position | None = Position.query.get(position_id)
-        if not position:
-            return f"Position with ID {position_id} does not exist."
-        
-        if position.employer_id != employer.id:
-            return f"Employer with ID {employer_id} is not authorized to reject students for this position."
-        
-        student: Student | None = Student.query.get(student_id)
-        if not student:
-            return f"Student with ID {student_id} does not exist."
-        
-        application = Application.query.filter_by(position_id=position.id, student_id=student.id).first()
+        application = Application.query.get(application_id)
         if not application:
-            return f"Student with ID {student_id} did not apply for Position ID {position_id}."
-        
-        # Check if application is in Shortlisted state
+            return f"Application with ID {application_id} does not exist."
+
+        position = Position.query.get(application.position_id)
+        if not position:
+            return f"Position with ID {application.position_id} does not exist."
+
+        if position.employer_id != employer_id:
+            return f"Employer with ID {employer_id} is not authorized to reject students for this position."
+
         if application.state_value != "Shortlisted":
             return "Only shortlisted applications can be rejected."
-        
+
         # change application state to Rejected
         try:
             application.state.reject(application)
             db.session.add(application)
             db.session.commit()
-            return f"Application for Student ID {student_id} to Position ID {position_id} has been rejected."
+            return f"Application ID {application_id} has been rejected."
         except Exception as e:
             db.session.rollback()
             return f"Error updating application status: {e}"

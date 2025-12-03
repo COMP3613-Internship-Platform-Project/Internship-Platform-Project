@@ -33,8 +33,8 @@ from App.controllers.employer import (
     get_all_shortlists_by_employer,
     get_shortlist_by_position_employer,
     list_positions_by_employer,
-    accept_student,
-    reject_student,
+    accept_application,
+    reject_application,
 )
 from App.controllers.position import (
     create_position,
@@ -375,23 +375,19 @@ def view_employer_shortlists_by_position_command(position_id, employer_id ):
 
 #Accept a student application from a shortlist
 @employer_cli.command("accept", help="Accepts an application from a shortlist")
+@click.argument("application_id", default=1)
 @click.argument("employer_id", default=3)
-@click.argument("position_id", default=1)
-@click.argument("student_id", default=5)
-def accept_shortlist_command(employer_id, position_id, student_id):
-    application = accept_student(employer_id, position_id, student_id)
-    if isinstance(application, str):
-        print(application)
+def accept_shortlist_command(application_id, employer_id):
+    result = accept_application(application_id, employer_id)
+    print(result)
 
 #Rejects a student application from a shortlist
 @employer_cli.command("reject", help="Rejects an application from a shortlist")
+@click.argument("application_id", default=1)
 @click.argument("employer_id", default=3)
-@click.argument("position_id", default=1)
-@click.argument("student_id", default=5)
-def reject_shortlist_command(employer_id, position_id, student_id):
-    application = reject_student(employer_id, position_id, student_id)
-    if isinstance(application, str):
-        print(application)
+def reject_shortlist_command(application_id, employer_id):
+    result = reject_application(application_id, employer_id)
+    print(result)
 
 app.cli.add_command(employer_cli) # add the group to the cli        
 
