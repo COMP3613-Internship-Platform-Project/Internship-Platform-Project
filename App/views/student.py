@@ -2,6 +2,7 @@ from flask import Blueprint, jsonify, request
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from App.controllers.student import student_reject_position
 from App.models.student import Student
+from App.models.position import Position
 from App.controllers import ( 
     get_user_by_username, 
     is_student, 
@@ -120,6 +121,10 @@ def get_application_by_student_and_position_endpoint(student_id, position_id):
     student = Student.query.get(int_student_id)
     if not student:
         return jsonify({"error": "Student not found"}), 404
+    
+    position = Position.query.get(int_position_id)
+    if not position:
+        return jsonify({"error": "Position not found"}), 404
 
     # Only allow the student to view their own application
     if int(authenticated_student_id) != int_student_id:
@@ -187,6 +192,10 @@ def reject_position_endpoint(student_id, position_id):
     student = Student.query.get(int_student_id)
     if not student:
         return jsonify({"error": "Student not found"}), 404
+    
+    position = Position.query.get(int_position_id)
+    if not position:
+        return jsonify({"error": "Position not found"}), 404
     
     # check if the requester is trying to access their own shortlists
     if int(authenticated_student_id) != int_student_id:
