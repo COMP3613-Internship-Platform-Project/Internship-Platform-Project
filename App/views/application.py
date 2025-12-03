@@ -15,9 +15,10 @@ def create_application_endpoint():
 
     data = request.json
 
-    if get_application_by_student_and_position(data['student_id'], data['position_id']):
+    existing = get_application_by_student_and_position(authenticated_student_id, data['position_id'])
+    if isinstance(existing, dict):
         return jsonify({"error": "Application for this position by the student already exists"}), 400
-    application = create_application(student_id=data['student_id'],position_id=data['position_id'])
+    application = create_application(authenticated_student_id, position_id=data['position_id'])
 
     try:
         if application is None:
@@ -26,7 +27,7 @@ def create_application_endpoint():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-@application_views.route('/api/application/<application_id>/shortlist', methods=['POST'])
+@application_views.route('/api/application/<application_id>/shortlist', methods=['PUT'])
 @jwt_required()
 def add_application_to_shortlist_endpoint(application_id):
     authenticated_staff_id = get_jwt_identity()
