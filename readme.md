@@ -1,229 +1,707 @@
-![Tests](https://github.com/uwidcit/flaskmvc/actions/workflows/dev.yml/badge.svg)
+# Intership Platform
 
-# Flask MVC Template
-A template for flask applications structured in the Model View Controller pattern [Demo](https://dcit-flaskmvc.herokuapp.com/). [Postman Collection](https://documenter.getpostman.com/view/583570/2s83zcTnEJ)
+### The following is built for an application that is meant to take student users applying to internship positions made by employers, the applications are reviewed by university staff members who will place the applications on a shortlist for the employers to review and accept accordingly.
+
+## Requirements 
+The aplication utilises a restful API through the Postman application to be run.
+
+# Collaborators
+- ### Franchesca James
+- ### Marishel Lochan
+- ### Jamal Mohammed
+- ### Jason Downie
 
 
-# Dependencies
-* Python3/pip3
-* Packages listed in requirements.txt
+# Internship Platform - CLI Commands Guide
 
-# Installing Dependencies
+This document outlines all available Flask CLI commands for managing the Internship Platform application.
+
+## Getting Started
+
+To view all available commands:
 ```bash
-$ pip install -r requirements.txt
+flask help
 ```
 
-# Configuration Management
-
-
-Configuration information such as the database url/port, credentials, API keys etc are to be supplied to the application. However, it is bad practice to stage production information in publicly visible repositories.
-Instead, all config is provided by a config file or via [environment variables](https://linuxize.com/post/how-to-set-and-list-environment-variables-in-linux/).
-
-## In Development
-
-When running the project in a development environment (such as gitpod) the app is configured via default_config.py file in the App folder. By default, the config for development uses a sqlite database.
-
-default_config.py
-```python
-SQLALCHEMY_DATABASE_URI = "sqlite:///temp-database.db"
-SECRET_KEY = "secret key"
-JWT_ACCESS_TOKEN_EXPIRES = 7
-ENV = "DEVELOPMENT"
+To initialize the database:
+```bash
+flask init
 ```
 
-These values would be imported and added to the app in load_config() function in config.py
+---
 
-config.py
-```python
-# must be updated to inlude addtional secrets/ api keys & use a gitignored custom-config file instad
-def load_config():
-    config = {'ENV': os.environ.get('ENV', 'DEVELOPMENT')}
-    delta = 7
-    if config['ENV'] == "DEVELOPMENT":
-        from .default_config import JWT_ACCESS_TOKEN_EXPIRES, SQLALCHEMY_DATABASE_URI, SECRET_KEY
-        config['SQLALCHEMY_DATABASE_URI'] = SQLALCHEMY_DATABASE_URI
-        config['SECRET_KEY'] = SECRET_KEY
-        delta = JWT_ACCESS_TOKEN_EXPIRES
-...
-```
+## Common Usage Scenarios
 
-## In Production
-
-When deploying your application to production/staging you must pass
-in configuration information via environment tab of your render project's dashboard.
-
-![perms](./images/fig1.png)
-
-# Flask Commands
-
-wsgi.py is a utility script for performing various tasks related to the project. You can use it to import and test any code in the project. 
-You just need create a manager command function, for example:
-
-```python
-# inside wsgi.py
-
-user_cli = AppGroup('user', help='User object commands')
-
-@user_cli.cli.command("create-user")
-@click.argument("username")
-@click.argument("password")
-def create_user_command(username, password):
-    create_user(username, password)
-    print(f'{username} created!')
-
-app.cli.add_command(user_cli) # add the group to the cli
-
-```
-
-Then execute the command invoking with flask cli with command name and the relevant parameters
+### Scenario 1: Post a Position and Hire a Student
 
 ```bash
-$ flask user create bob bobpass
+# 1. Create a position as employer
+flask employer position 3 "Backend Developer Intern" 2 "['Python', 'Django']"
+
+# 2. Student applies
+flask student apply 5 1
+
+# 3. Staff reviews and shortlists
+flask staff shortlist-application 1 1
+
+# 4. Employer accepts
+flask employer accept 1 3
 ```
 
-
-# Running the Project
-
-_For development run the serve command (what you execute):_
-```bash
-$ flask run
-```
-
-_For production using gunicorn (what the production server executes):_
-```bash
-$ gunicorn wsgi:app
-```
-
-# Deploying
-You can deploy your version of this app to render by clicking on the "Deploy to Render" link above.
-
-# Initializing the Database
-When connecting the project to a fresh empty database ensure the appropriate configuration is set then file then run the following command. This must also be executed once when running the app on heroku by opening the heroku console, executing bash and running the command in the dyno.
+### Scenario 2: View Student's Progress
 
 ```bash
-$ flask init
+# View all applications
+flask student get-all-applications 5
+
+# View specific application
+flask student get-position-application 5 1
+
+# View shortlists
+flask student get-shortlists 5
 ```
 
-# Database Migrations
-If changes to the models are made, the database must be'migrated' so that it can be synced with the new models.
-Then execute following commands using manage.py. More info [here](https://flask-migrate.readthedocs.io/en/latest/)
+### Scenario 3: Staff Manages Applications
 
 ```bash
-$ flask db init
-$ flask db migrate
-$ flask db upgrade
-$ flask db --help
+# View all applications
+flask staff applications 1
+
+# View applications for specific position
+flask staff applications-by-position 1 3
+
+# Shortlist promising candidates
+flask staff shortlist-application 1 5
 ```
 
-# Testing
+---
 
-## Unit & Integration
-Unit and Integration tests are created in the App/test. You can then create commands to run them. Look at the unit test command in wsgi.py for example
+## User Commands
 
-```python
-@test.command("user", help="Run User tests")
-@click.argument("type", default="all")
-def user_tests_command(type):
-    if type == "unit":
-        sys.exit(pytest.main(["-k", "UserUnitTests"]))
-    elif type == "int":
-        sys.exit(pytest.main(["-k", "UserIntegrationTests"]))
-    else:
-        sys.exit(pytest.main(["-k", "User"]))
-```
+User management commands for creating and listing users.
 
-You can then execute all user tests as follows
+### List All Users
+
+View all users in the database.
 
 ```bash
-$ flask test user
+flask user list [format]
 ```
 
-You can also supply "unit" or "int" at the end of the comand to execute only unit or integration tests.
+**Arguments:**
+- `format` (optional, default: "string") - Output format. Use "string" for text output or "json" for JSON format.
 
-You can run all application tests with the following command
+**Examples:**
+```bash
+# List users as text
+flask user list string
+
+# List users as JSON
+flask user list json
+```
+
+### Create a Student
+
+Create a new student user interactively.
 
 ```bash
-$ pytest
+flask user create-student
 ```
 
-## Test Coverage
+**Interactive Prompts:**
+- Username
+- Password
+- Email
+- Skills (comma-separated list)
 
-You can generate a report on your test coverage via the following command
+**Example:**
+```bash
+flask user create-student
+# Enter username: john_doe
+# Enter password: password123
+# Enter email: john@example.com
+# Enter skills (comma separated): Python, JavaScript, React
+```
+
+### Create a Staff Member
+
+Create a new staff user interactively.
 
 ```bash
-$ coverage report
+flask user create-staff
 ```
 
-You can also generate a detailed html report in a directory named htmlcov with the following comand
+**Interactive Prompts:**
+- Username
+- Password
+- Email
+
+**Example:**
+```bash
+flask user create-staff
+# Enter username: staff_member
+# Enter password: staffpass123
+# Enter email: staff@example.com
+```
+
+### Create an Employer
+
+Create a new employer user interactively.
 
 ```bash
-$ coverage html
+flask user create-employer
 ```
 
-# Troubleshooting
+**Interactive Prompts:**
+- Username
+- Password
+- Email
 
-## Views 404ing
-
-If your newly created views are returning 404 ensure that they are added to the list in main.py.
-
-```python
-from App.views import (
-    user_views,
-    index_views
-)
-
-# New views must be imported and added to this list
-views = [
-    user_views,
-    index_views
-]
+**Example:**
+```bash
+flask user create-employer
+# Enter username: acme_corp
+# Enter password: employerpass123
+# Enter email: hr@acme.com
 ```
 
-## Cannot Update Workflow file
+---
 
-If you are running into errors in gitpod when updateding your github actions file, ensure your [github permissions](https://gitpod.io/integrations) in gitpod has workflow enabled ![perms](./images/gitperms.png)
+## Student Commands
 
-## Database Issues
+Student-related commands for viewing positions, applying, and managing applications.
 
-If you are adding models you may need to migrate the database with the commands given in the previous database migration section. Alternateively you can delete you database file.
+### View Open Positions
 
-# Flask Commands for Assignment
+List all open positions available for a student.
 
-## flask user "username" "password" "type"
-    type: Which type of account. Choice between student, staff or employer
-    Creates a user account.
+```bash
+flask student view-positions [student_id]
+```
 
-## flask user add_position "title" "employer_id"
-    title: Title of position
-    employer_id: Id of employer
+**Arguments:**
+- `student_id` (optional, default: 5) - The ID of the student
 
-    Creates an internship position for staff to shortlist on
+**Example:**
+```bash
+flask student view-positions 2
+```
 
-## flask user add_to_shortlist "student_id" "position_id" "staff_id"
-    student_id: Id of Student
-    position_id: Id of Position
-    staff_id: Id of Staff
+### Apply to a Position
 
-    Staff member add a student to a position's shortlist
+Create an application for a student to a specific position.
 
-## flask user decide_shortlist "student_id" "position_id"
-    student_id: Id of Student
-    position_id: Id of Position
+```bash
+flask student apply [student_id] [position_id]
+```
 
-    Employer either accepts or rejects a student from the shortlist
+**Arguments:**
+- `student_id` (optional, default: 5) - The ID of the student
+- `position_id` (optional, default: 2) - The ID of the position to apply to
 
-## flask user get_shortlist "student_id"
-    student_id: Id of Student
+**Example:**
+```bash
+flask student apply 2 3
+```
 
-    Retrives the positions the selected student is shortlisted on
+**Returns:**
+- Success message with application details, or error message if unable to apply
 
-## flask user get_shortlist_by_position "position_id"
-    position_id: Id of Position
+### Get All Applications
 
-    Retrives the shortlist for a specific position
+View all applications submitted by a student.
 
-## flask user get_position_by_employer "employer_id"
-    employer_id: Id of employer
+```bash
+flask student get-all-applications [student_id]
+```
 
-    Retrives the postiotns created from a given employer
-        
+**Arguments:**
+- `student_id` (optional, default: 5) - The ID of the student
+
+**Example:**
+```bash
+flask student get-all-applications 2
+```
+
+**Returns:**
+- List of applications with employer name, position title, application status, and student details
+
+### Get Application for Specific Position
+
+View a student's application for a specific position.
+
+```bash
+flask student get-position-application [student_id] [position_id]
+```
+
+**Arguments:**
+- `student_id` (optional, default: 5) - The ID of the student
+- `position_id` (optional, default: 2) - The ID of the position
+
+**Example:**
+```bash
+flask student get-position-application 2 3
+```
+
+**Returns:**
+- Application details or error message if no application exists
+
+### Get Shortlisted Applications
+
+View all applications that have been shortlisted.
+
+```bash
+flask student get-shortlists [student_id]
+```
+
+**Arguments:**
+- `student_id` (optional, default: 5) - The ID of the student
+
+**Example:**
+```bash
+flask student get-shortlists 2
+```
+
+**Returns:**
+- List of shortlisted applications with employer and position information
+
+### Reject a Position
+
+Reject an accepted position offer.
+
+```bash
+flask student reject-position [student_id] [position_id]
+```
+
+**Arguments:**
+- `student_id` (optional, default: 5) - The ID of the student
+- `position_id` (optional, default: 1) - The ID of the position to reject
+
+**Example:**
+```bash
+flask student reject-position 2 3
+```
+
+**Note:** The application must be in "Accepted" state to reject it.
+
+---
+
+## Staff Commands
+
+Staff-related commands for managing positions, students, applications, and shortlists.
+
+### List All Positions
+
+View all available positions.
+
+```bash
+flask staff positions [staff_id]
+```
+
+**Arguments:**
+- `staff_id` (optional, default: 1) - The ID of the staff member
+
+**Example:**
+```bash
+flask staff positions 1
+```
+
+**Returns:**
+- List of positions with title, number of positions, status, and employer information
+
+### Create a Shortlist for a Position
+
+Create a shortlist for a specific position.
+
+```bash
+flask staff create-shortlist [position_id] [staff_id]
+```
+
+**Arguments:**
+- `position_id` (optional, default: 3) - The ID of the position
+- `staff_id` (optional, default: 1) - The ID of the staff member
+
+**Example:**
+```bash
+flask staff create-shortlist 3 1
+```
+
+**Returns:**
+- Success message with shortlist ID, or error message if shortlist already exists
+
+### List All Students
+
+View all students in the system.
+
+```bash
+flask staff students [staff_id]
+```
+
+**Arguments:**
+- `staff_id` (optional, default: 1) - The ID of the staff member
+
+**Example:**
+```bash
+flask staff students 1
+```
+
+**Returns:**
+- List of all students with username, email, skills, and user type
+
+### View All Applications
+
+View all applications across all positions.
+
+```bash
+flask staff applications [staff_id]
+```
+
+**Arguments:**
+- `staff_id` (optional, default: 1) - The ID of the staff member
+
+**Example:**
+```bash
+flask staff applications 1
+```
+
+**Returns:**
+- List of all applications with employer, position, student, and status information
+
+### View Applications by Position
+
+View applications for a specific position.
+
+```bash
+flask staff applications-by-position [staff_id] [position_id]
+```
+
+**Arguments:**
+- `staff_id` (optional, default: 1) - The ID of the staff member
+- `position_id` (optional, default: 1) - The ID of the position
+
+**Example:**
+```bash
+flask staff applications-by-position 1 3
+```
+
+**Returns:**
+- List of applications for the specified position
+
+### View All Shortlists
+
+View all shortlists in the system.
+
+```bash
+flask staff shortlists [staff_id]
+```
+
+**Arguments:**
+- `staff_id` (optional, default: 1) - The ID of the staff member
+
+**Example:**
+```bash
+flask staff shortlists 1
+```
+
+**Returns:**
+- List of all shortlists with their associated applications and student information
+
+### View Shortlists by Position
+
+View shortlisted applications for a specific position.
+
+```bash
+flask staff shortlists-by-position [position_id] [staff_id]
+```
+
+**Arguments:**
+- `position_id` (optional, default: 1) - The ID of the position
+- `staff_id` (optional, default: 1) - The ID of the staff member
+
+**Example:**
+```bash
+flask staff shortlists-by-position 3 1
+```
+
+**Returns:**
+- Shortlist information with shortlisted applications for the position
+
+### Add Application to Shortlist
+
+Move an application from "Applied" status to a shortlist.
+
+```bash
+flask staff shortlist-application [staff_id] [application_id]
+```
+
+**Arguments:**
+- `staff_id` (optional, default: 1) - The ID of the staff member
+- `application_id` (optional, default: 1) - The ID of the application to shortlist
+
+**Example:**
+```bash
+flask staff shortlist-application 1 5
+```
+
+**Returns:**
+- Success message or error message if application cannot be shortlisted
+
+---
+
+## Employer Commands
+
+Employer-related commands for managing positions, viewing applications, and making hiring decisions.
+
+### Create a Position
+
+Create a new internship position.
+
+```bash
+flask employer position [employer_id] [title] [number_of_positions] [skills]
+```
+
+**Arguments:**
+- `employer_id` (optional, default: 3) - The ID of the employer
+- `title` (optional, default: "Internship Position") - The position title
+- `number_of_positions` (optional, default: 5) - Number of positions available
+- `skills` (optional, default: ["Python", "C++"]) - Required skills (list format)
+
+**Example:**
+```bash
+flask employer position 3 "Software Engineer Intern" 3 "['Python', 'JavaScript']"
+```
+
+**Returns:**
+- Success message with position ID, or error message if position already exists
+
+### Close a Position
+
+Close an open position to stop accepting applications.
+
+```bash
+flask employer close-position [position_id] [employer_id]
+```
+
+**Arguments:**
+- `position_id` (optional, default: 1) - The ID of the position
+- `employer_id` (optional, default: 3) - The ID of the employer
+
+**Example:**
+```bash
+flask employer close-position 3 3
+```
+
+**Returns:**
+- Status message
+
+### Reopen a Position
+
+Reopen a previously closed position.
+
+```bash
+flask employer reopen-position [position_id] [employer_id]
+```
+
+**Arguments:**
+- `position_id` (optional, default: 1) - The ID of the position
+- `employer_id` (optional, default: 3) - The ID of the employer
+
+**Example:**
+```bash
+flask employer reopen-position 3 3
+```
+
+**Returns:**
+- Status message
+
+### List Positions by Employer
+
+View all positions created by an employer.
+
+```bash
+flask employer list-positions [employer_id]
+```
+
+**Arguments:**
+- `employer_id` (optional, default: 3) - The ID of the employer
+
+**Example:**
+```bash
+flask employer list-positions 3
+```
+
+**Returns:**
+- List of positions with details, or error message if no positions exist
+
+### View All Shortlists
+
+View all shortlisted applications for an employer's positions.
+
+```bash
+flask employer shortlists [employer_id]
+```
+
+**Arguments:**
+- `employer_id` (optional, default: 3) - The ID of the employer
+
+**Example:**
+```bash
+flask employer shortlists 3
+```
+
+**Returns:**
+- List of shortlisted applications with position and student information
+
+### View Shortlists by Position
+
+View shortlisted applications for a specific position.
+
+```bash
+flask employer shortlists-by-position [position_id] [employer_id]
+```
+
+**Arguments:**
+- `position_id` (optional, default: 1) - The ID of the position
+- `employer_id` (optional, default: 3) - The ID of the employer
+
+**Example:**
+```bash
+flask employer shortlists-by-position 3 3
+```
+
+**Returns:**
+- Shortlisted applications for the position
+
+### Accept an Application
+
+Accept a shortlisted application and offer the position to the student.
+
+```bash
+flask employer accept [application_id] [employer_id]
+```
+
+**Arguments:**
+- `application_id` (optional, default: 1) - The ID of the application
+- `employer_id` (optional, default: 3) - The ID of the employer
+
+**Example:**
+```bash
+flask employer accept 5 3
+```
+
+**Returns:**
+- Status message indicating acceptance or error
+
+**Note:** Only shortlisted applications can be accepted.
+
+### Reject an Application
+
+Reject a shortlisted application.
+
+```bash
+flask employer reject [application_id] [employer_id]
+```
+
+**Arguments:**
+- `application_id` (optional, default: 1) - The ID of the application
+- `employer_id` (optional, default: 3) - The ID of the employer
+
+**Example:**
+```bash
+flask employer reject 5 3
+```
+
+**Returns:**
+- Status message indicating rejection or error
+
+**Note:** Only shortlisted applications can be rejected.
+
+---
+
+## Test Commands
+
+Commands for running unit and integration tests.
+
+### Run User Tests
+
+Execute tests related to user functionality.
+
+```bash
+flask test user [test_type]
+```
+
+**Arguments:**
+- `test_type` (optional, default: "all") - Test type: "unit", "int" (integration), or "all"
+
+**Examples:**
+```bash
+# Run all user tests
+flask test user all
+
+# Run unit tests only
+flask test user unit
+
+# Run integration tests only
+flask test user int
+```
+
+---
+
+## Application State Transitions
+
+The following diagram shows how applications move through states:
+
+```
+Applied → Shortlisted → Accepted
+   ↓          ↓            ↓
+ (error)   Rejected      (final)
+```
+
+- **Applied**: Initial state when a student applies to a position
+- **Shortlisted**: Staff moves the application to a shortlist
+- **Accepted**: Employer accepts the shortlisted application
+- **Rejected**: Employer rejects the shortlisted application
+
+---
+
+
+
+## Error Handling
+
+Most commands return descriptive error messages if:
+- Required entities (user, position, application) don't exist
+- Invalid state transitions are attempted
+- Authorization checks fail
+
+Always check the returned message for operation status.
+
+---
+
+## Default Values Reference
+
+| Command | Parameter | Default Value |
+|---------|-----------|----------------|
+| user list | format | "string" |
+| student view-positions | student_id | 5 |
+| student apply | student_id, position_id | 5, 2 |
+| student get-all-applications | student_id | 5 |
+| student get-position-application | student_id, position_id | 5, 2 |
+| student get-shortlists | student_id | 5 |
+| student reject-position | student_id, position_id | 5, 1 |
+| staff positions | staff_id | 1 |
+| staff create-shortlist | position_id, staff_id | 3, 1 |
+| staff students | staff_id | 1 |
+| staff applications | staff_id | 1 |
+| staff applications-by-position | staff_id, position_id | 1, 1 |
+| staff shortlists | staff_id | 1 |
+| staff shortlists-by-position | position_id, staff_id | 1, 1 |
+| staff shortlist-application | staff_id, application_id | 1, 1 |
+| employer position | employer_id, title, number, skills | 3, "Internship Position", 5, ["Python", "C++"] |
+| employer close-position | position_id, employer_id | 1, 3 |
+| employer reopen-position | position_id, employer_id | 1, 3 |
+| employer list-positions | employer_id | 3 |
+| employer shortlists | employer_id | 3 |
+| employer shortlists-by-position | position_id, employer_id | 1, 3 |
+| employer accept | application_id, employer_id | 1, 3 |
+| employer reject | application_id, employer_id | 1, 3 |
+| test user | type | "all" |
