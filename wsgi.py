@@ -20,7 +20,7 @@ from App.controllers.staff import (
     get_all_shortlists,
     get_shortlist_by_position_staff,
     get_all_applications,
-    get_applications_by_position
+    get_all_applications_by_position
 )
 
 from App.controllers.application import (
@@ -257,7 +257,7 @@ def view_applications_command(staff_id):
 @click.argument("staff_id", default=1)
 @click.argument("position_id", default=1)
 def view_applications_by_position_command(staff_id, position_id):
-    application = get_applications_by_position(staff_id, position_id)
+    application = get_all_applications_by_position(staff_id, position_id)
     if isinstance(application, list) and application:
         for app in application:
             print(app)

@@ -163,7 +163,7 @@ def get_all_applications(staff_id:int): #Marishel - added function to get all ap
     except SQLAlchemyError as e:
         raise Exception(f"Error retrieving applications: {e}")
 
-def get_applications_by_position(staff_id:int, position_id:int): # Marishel - added function to get applications by position ID and checking to ensure user is staff
+def get_all_applications_by_position(staff_id:int, position_id:int): # Marishel - added function to get applications by position ID and checking to ensure user is staff
     try:
         staff = db.session.query(Staff).filter_by(id=staff_id).first()
         if not staff:
