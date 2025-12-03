@@ -219,12 +219,12 @@ class UserIntegrationTests(unittest.TestCase):
         result = close_position(position.id, employer2.id)
         assert result == f"Employer with ID {employer2.id} is not authorized to close this position."
 
-    def test_close_already_closed_position(self): #add to doc
-        employer = create_employer("Amazon", "amazonpass","amazon@mail.com")
+    def test_close_already_closed_position(self):
+        employer = create_employer("Amazon", "amazonpass","amazon@mail.com")  
         position = create_position(employer.id, "Data Analyst Intern", 3, ["R", "SQL"])
         close_position(position.id, employer.id)
         result = close_position(position.id, employer.id)
-        assert result == f"Position with ID {position.id} has been closed."
+        assert result == f"Position with ID {position.id} is already closed."
 
     def test_view_all_positions(self):
         employer = create_employer("Facebook", "facebookpass","facebook@mail.com")
