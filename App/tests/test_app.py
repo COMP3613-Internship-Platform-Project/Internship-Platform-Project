@@ -530,6 +530,15 @@ class UserIntegrationTests(unittest.TestCase):
         accept_application(application.id, employer.id)
         self.assertEqual(application.state_value, "Accepted")
     
+    def test_accept_unshortlisted_application(self): #add to doc
+        employer = create_employer("Airbnb", "airbnbpass", "airbnb@mail.com")
+        position = create_position(employer.id, "Hospitality Intern", 4, ["Customer Service", "Communication"])
+        staff = create_staff("trudy", "trudypass", "trudy@mail.com")
+        student = create_student("alice", "alicepass", "alice@mail.com", ["Java", "React"])
+        application = create_application(student.id, position.id)
+        shortlist = create_shortlist(position.id, staff.id)
+        result = accept_application(application.id, employer.id)
+        assert result == "Only shortlisted applications can be accepted."
 
     def test_student_reject_position(self):
         employer = create_employer("Airbnb", "airbnbpass", "airbnb@mail.com")
