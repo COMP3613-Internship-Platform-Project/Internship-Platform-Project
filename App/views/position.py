@@ -52,7 +52,7 @@ def close_position_route(position_id):
     if not position:
         return jsonify({"error": "Position not found or access denied"}), 404
     
-    if position.status == 'closed':
+    if position.status == 'Closed':
         return jsonify({"error": "Position is already closed"}), 400
     
     try:
@@ -72,7 +72,7 @@ def reopen_position_route(position_id):
     if not position:
         return jsonify({"error": "Position not found or access denied"}), 404
     
-    if position.status == 'open':
+    if position.status == 'Open':
         return jsonify({"error": "Position is already open"}), 400
     
     try:
