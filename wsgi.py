@@ -315,13 +315,15 @@ employer_cli = AppGroup('employer', help='Employer object commands')
 @click.argument("employer_id", default=3)
 @click.argument("title", default="Internship Position")
 @click.argument("number_of_positions", default=5)
-@click.argument("skills", default=["Python", "C++"])
-def create_position_command(employer_id, title, number_of_positions, skills):
+def create_position_command(employer_id, title, number_of_positions):
+    skills = click.prompt("Enter skills (comma separated)").split(", ")
     position = create_position(employer_id, title, number_of_positions, skills)
     if isinstance(position, str):
         print(position)
     else:
         print(f'Position {position.title} created with ID: {position.id}')
+
+
 
 @employer_cli.command("close-position", help="Closes a position")
 @click.argument("position_id", default=1)
