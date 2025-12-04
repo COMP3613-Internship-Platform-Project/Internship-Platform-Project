@@ -75,7 +75,7 @@ flask student reject-position 5 3
 flask staff applications 1
 
 # 9. Staff views applications for specific position
-flask staff applications 1
+flask staff applications-by-position 1 3
 
 ```
 ### Scenario 2: Student applies but employer rejects student
